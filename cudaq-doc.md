@@ -30,7 +30,7 @@
   - [Batch Simulation](#batch-simulation)
   - [Multi-GPU Multi-Node Execution](#multi-gpu-multi-node-execution)
   - [Examples](#examples)
-- **[Part 3: GPU Simulator Backends & Performance Options](#part-3-gpu-simulator-backends-performance-options)**
+- **[Part 3: GPU Simulator Backends and Performance Options](#part-3-gpu-simulator-backends-and-performance-options)**
   - [State Vector Simulators](#state-vector-simulators)
   - [Tensor Network Simulators](#tensor-network-simulators)
 - **[Part 4: Amazon Braket Backend](#part-4-amazon-braket-backend)**
