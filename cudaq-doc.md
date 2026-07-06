@@ -1,6 +1,6 @@
 # CUDA-Q Reference for AI Agents (Python)
 
-> Combined from the NVIDIA CUDA-Q documentation (https://nvidia.github.io/cuda-quantum/latest/): the "CUDA-Q by Example" tutorials, the Dynamics Simulation guide, the GPU simulator backend pages, and the Python API reference. Python only; verified against the latest published docs.
+> Combined from the NVIDIA CUDA-Q documentation (https://nvidia.github.io/cuda-quantum/latest/): the "CUDA-Q by Example" tutorials, the Dynamics Simulation guide, the GPU simulator backend pages, the Amazon Braket backend page, and the Python API reference. Python only; verified against the latest published docs.
 
 ## Contents
 
@@ -33,7 +33,10 @@
 - **[Part 3: GPU Simulator Backends & Performance Options](#part-3-gpu-simulator-backends-performance-options)**
   - [State Vector Simulators](#state-vector-simulators)
   - [Tensor Network Simulators](#tensor-network-simulators)
-- **[Part 4: Python API Reference](#part-4-python-api-reference)**
+- **[Part 4: Amazon Braket Backend](#part-4-amazon-braket-backend)**
+  - [Setting Credentials](#setting-credentials)
+  - [Submitting](#submitting)
+- **[Part 5: Python API Reference](#part-5-python-api-reference)**
   - [Program Construction](#program-construction)
   - [Kernel Execution](#kernel-execution)
   - [Quantum Error Correction](#quantum-error-correction)
@@ -42,7 +45,6 @@
   - [Operators](#operators)
   - [Data Types](#data-types)
   - [MPI Submodule](#mpi-submodule)
-  - [ORCA Submodule](#orca-submodule)
   - [PTSBE Submodule](#ptsbe-submodule)
 
 ---
@@ -1473,7 +1475,7 @@ CUDA-Q provides several optimizers with configurable parameters. Let's explore t
 
 **Adam (Adaptive Moment Estimation)** combines momentum and adaptive learning rates for efficient optimization. It's particularly effective for problems with noisy gradients.
 
-**Configurable parameters:** `step_size`, `beta1`, `beta2`, `epsilon`, `batch_size`, `f_tol`, `max_iterations`, `initial_parameters` — defaults and semantics: see [Optimizers](#optimizers) in Part 4.
+**Configurable parameters:** `step_size`, `beta1`, `beta2`, `epsilon`, `batch_size`, `f_tol`, `max_iterations`, `initial_parameters` — defaults and semantics: see [Optimizers](#optimizers) in Part 5.
 
 The optimizer and gradient are specified below. An objective function is defined which uses a lambda expression to evaluate the cost (a CUDA-Q `observe` expectation value). The gradient is calculated using the `compute` method.
 
@@ -1530,7 +1532,7 @@ Optimal parameters: [-5.721116]
 
 **SGD** is a fundamental optimization algorithm that updates parameters by taking steps proportional to the negative gradient.
 
-**Configurable parameters:** `step_size`, `batch_size`, `f_tol`, `max_iterations`, `initial_parameters` (see [Optimizers](#optimizers) in Part 4).
+**Configurable parameters:** `step_size`, `batch_size`, `f_tol`, `max_iterations`, `initial_parameters` (see [Optimizers](#optimizers) in Part 5).
 
 SGD is simpler than Adam and can be effective when you understand your problem well enough to tune the learning rate appropriately.
 
@@ -1564,7 +1566,7 @@ Optimal parameters: [-5.688733]
 
 **SPSA** is a gradient-free stochastic optimization algorithm that is particularly useful for noisy objective functions (like quantum hardware with shot noise). It approximates gradients using simultaneous perturbations and requires only **2 function evaluations per iteration** regardless of problem dimension.
 
-**Configurable parameters:** `step_size`, `gamma`, `max_iterations`, `initial_parameters` (see [Optimizers](#optimizers) in Part 4).
+**Configurable parameters:** `step_size`, `gamma`, `max_iterations`, `initial_parameters` (see [Optimizers](#optimizers) in Part 5).
 
 **Key Advantage**: SPSA does **not** require gradients, making it ideal for noisy functions and quantum hardware.
 
@@ -2000,7 +2002,7 @@ print(result)
 
 After trajectories are selected, shots are distributed across them:
 
-Allocation types (`PROPORTIONAL`, `UNIFORM`, `LOW_WEIGHT_BIAS`, `HIGH_WEIGHT_BIAS`) and the `bias_strength` field: see the [PTSBE Submodule](#ptsbe-submodule) in Part 4.
+Allocation types (`PROPORTIONAL`, `UNIFORM`, `LOW_WEIGHT_BIAS`, `HIGH_WEIGHT_BIAS`) and the `bias_strength` field: see the [PTSBE Submodule](#ptsbe-submodule) in Part 5.
 
 ```python
 import cudaq
@@ -2616,116 +2618,6 @@ print(counts)
 # any remaining classical code in the file will occur only
 # after the job has been returned from OQC.
 counts = cudaq.sample(kernel)
-print(counts)
-```
-
-#### ORCA Computing
-
-ORCA Computing's PT Series implement the boson sampling model of quantum computation, in which
-multiple photons are interfered with each other within a network of beam splitters, and photon
-detectors measure where the photons leave this network.
-
-The image below shows the schematic of a Time Bin Interferometer (TBI) boson sampling experiment on ORCA's backends: optical delay lines with reconfigurable coupling parameters, here with 4 photons in 8 modes sent into alternating time-bins through two delay lines in series.
-
-![figure](https://nvidia.github.io/cuda-quantum/latest/_images/orca_tbi.png)
-
-A TBI is defined by the *input state* (initial photon state; the left-most entry is the first mode entering the loop), the *loop lengths* of its delay loops, the controllable *beam splitter angles* and optionally *phase shifter angles*, and the number of samples.
-
-This experiment is performed on ORCA's backends by the code below.
-
-```python
-import cudaq
-import time
-
-import numpy as np
-import os
-# You only have to set the target once! No need to redefine it
-# for every execution call on your kernel.
-# To use different targets in the same file, you must update
-# it via another call to `cudaq.set_target()`
-
-# To use the ORCA Computing target you will need to set the ORCA_ACCESS_URL
-# environment variable or pass a URL.
-orca_url = os.getenv("ORCA_ACCESS_URL", "http://localhost/sample")
-
-cudaq.set_target("orca", url=orca_url)
-
-# A time-bin boson sampling experiment: An input state of 4 indistinguishable
-# photons mixed with 4 vacuum states across 8 time bins (modes) enter the
-# time bin interferometer (TBI). The interferometer is composed of two loops
-# each with a beam splitter (and optionally with a corresponding phase
-# shifter). Each photon can either be stored in a loop to interfere with the
-# next photon or exit the loop to be measured. Since there are 8 time bins
-# and 2 loops, there is a total of 14 beam splitters (and optionally 14 phase
-# shifters) in the interferometer, which is the number of controllable
-# parameters.
-
-# half of 8 time bins is filled with a single photon and the other half is
-# filled with the vacuum state (empty)
-input_state = [1, 0, 1, 0, 1, 0, 1, 0]
-
-# The time bin interferometer in this example has two loops, each of length 1
-loop_lengths = [1, 1]
-
-# Calculate the number of beam splitters and phase shifters
-n_beam_splitters = len(loop_lengths) * len(input_state) - sum(loop_lengths)
-
-# beam splitter angles
-bs_angles = np.linspace(np.pi / 3, np.pi / 6, n_beam_splitters)
-
-# Optionally, we can also specify the phase shifter angles, if the system
-# includes phase shifters
-# ```
-# ps_angles = np.linspace(np.pi / 3, np.pi / 5, n_beam_splitters)
-# ```
-
-# we can also set number of requested samples
-n_samples = 10000
-
-# Option A:
-# By using the synchronous `cudaq.orca.sample`, the execution of
-# any remaining classical code in the file will occur only
-# after the job has been returned from ORCA Server.
-print("Submitting to ORCA Server synchronously")
-counts = cudaq.orca.sample(input_state, loop_lengths, bs_angles, n_samples)
-
-# If the system includes phase shifters, the phase shifter angles can be
-# included in the call
-# ```
-# counts = cudaq.orca.sample(input_state, loop_lengths, bs_angles, ps_angles,
-#                            n_samples)
-# ```
-
-# Print the results
-print(counts)
-
-# Option B:
-# By using the asynchronous `cudaq.orca.sample_async`, the remaining
-# classical code will be executed while the job is being handled
-# by Orca. This is ideal when submitting via a queue over
-# the cloud.
-print("Submitting to ORCA Server asynchronously")
-async_results = cudaq.orca.sample_async(input_state, loop_lengths, bs_angles,
-                                        n_samples)
-# ... more classical code to run ...
-
-# We can either retrieve the results later in the program with
-# ```
-# async_counts = async_results.get()
-# ```
-# or we can also write the job reference (`async_results`) to
-# a file and load it later or from a different process.
-file = open("future.txt", "w")
-file.write(str(async_results))
-file.close()
-
-# We can later read the file content and retrieve the job
-# information and results.
-time.sleep(0.2)  # wait for the job to be processed
-same_file = open("future.txt", "r")
-retrieved_async_results = cudaq.AsyncSampleResult(str(same_file.read()))
-
-counts = retrieved_async_results.get()
 print(counts)
 ```
 
@@ -4180,7 +4072,67 @@ Specific aspects of the simulation can be configured by defining the following e
 
 ---
 
-## Part 4: Python API Reference
+## Part 4: Amazon Braket Backend
+
+> Source: https://nvidia.github.io/cuda-quantum/latest/using/backends/cloud/braket.html
+
+[Amazon Braket](https://aws.amazon.com/braket/) is a fully managed AWS service which provides Jupyter notebook environments, high-performance quantum circuit simulators, and secure, on-demand access to various quantum computers. To get started, users must enable Amazon Braket in their AWS account by following [these instructions](https://docs.aws.amazon.com/braket/latest/developerguide/braket-enable-overview.html). See the [Amazon Braket Documentation](https://docs.aws.amazon.com/braket/) and [Examples](https://github.com/amazon-braket/amazon-braket-examples/tree/main/examples/nvidia_cuda_q); available devices and regions are listed [here](https://docs.aws.amazon.com/braket/latest/developerguide/braket-devices.html).
+
+CUDA-Q programs can run on Amazon Braket as a [Hybrid Job](https://docs.aws.amazon.com/braket/latest/developerguide/braket-what-is-hybrid-job.html) — see the [Hybrid Jobs getting-started guide](https://docs.aws.amazon.com/braket/latest/developerguide/braket-jobs-first.html) and the [CUDA-Q on Braket guide](https://docs.aws.amazon.com/braket/latest/developerguide/braket-using-cuda-q.html).
+
+### Setting Credentials
+
+After enabling Amazon Braket in AWS, set credentials using any of the documented [methods](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html). The simplest is the [AWS CLI](https://aws.amazon.com/cli/):
+
+```bash
+aws configure
+```
+
+Alternatively, set the following environment variables:
+
+```bash
+export AWS_DEFAULT_REGION="<region>"
+export AWS_ACCESS_KEY_ID="<key_id>"
+export AWS_SECRET_ACCESS_KEY="<access_key>"
+export AWS_SESSION_TOKEN="<token>"
+```
+
+### Submitting
+
+Select the submission target with `cudaq.set_target()`:
+
+```python
+cudaq.set_target("braket")
+```
+
+By default, jobs are submitted to the state vector simulator, `SV1`.
+
+To specify which Amazon Braket device to use, set the `machine` parameter.
+
+```python
+device_arn = "arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet"
+cudaq.set_target("braket", machine=device_arn)
+```
+
+where `arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet` refers to the IQM Garnet QPU.
+
+To emulate the device locally, without submitting through the cloud, you can also set the `emulate` flag to `True`.
+
+```python
+cudaq.set_target("braket", emulate=True)
+```
+
+Set the number of shots for a kernel execution via the `shots_count` argument to `cudaq.sample` (default: 1000).
+
+```python
+cudaq.sample(kernel, shots_count=100)
+```
+
+For a complete example, see the Amazon Braket section of [15. Using Quantum Hardware Providers](#15-using-quantum-hardware-providers) in Part 1.
+
+---
+
+## Part 5: Python API Reference
 
 > Source: https://nvidia.github.io/cuda-quantum/latest/api/languages/python_api.html
 
@@ -6357,12 +6309,6 @@ When using `mpi4py`, keep the communicator object alive while CUDA-Q uses it.
 #### `cudaq.mpi.finalize() → None`
 
 Finalize MPI.
-
-### ORCA Submodule
-
-#### `cudaq.orca.sample(input_state:collections.abc.Sequence[int], loop_lengths:collections.abc.Sequence[int], bs_angles:collections.abc.Sequence[float], ps_angles:collections.abc.Sequence[float], n_samples:int=10000, qpu_id:int=0) → cudaq.SampleResult`
-
-(A second overload omits `ps_angles`.) Performs Time Bin Interferometer (TBI) boson sampling experiments on ORCA’s backends
 
 ### PTSBE Submodule
 
