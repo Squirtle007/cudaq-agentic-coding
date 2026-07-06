@@ -13,7 +13,7 @@
   - [6. Executing Kernels](#6-executing-kernels)
   - [7. Computing Expectation Values](#7-computing-expectation-values)
   - [8. Multi-GPU Workflows](#8-multi-gpu-workflows)
-  - [9. Optimizers & Gradients](#9-optimizers-gradients)
+  - [9. Optimizers & Gradients](#9-optimizers--gradients)
   - [10. Noisy Simulations](#10-noisy-simulations)
   - [11. Pre-Trajectory Sampling with Batch Execution (PTSBE)](#11-pre-trajectory-sampling-with-batch-execution-ptsbe)
   - [12. Detector Error Models](#12-detector-error-models)
@@ -22,7 +22,7 @@
   - [15. Using Quantum Hardware Providers](#15-using-quantum-hardware-providers)
   - [16. When to Use sample vs. run](#16-when-to-use-sample-vs-run)
 - **[Part 2: Dynamics Simulation](#part-2-dynamics-simulation)**
-  - [Quick Start](#quick-start)
+  - [Quick Start](#quick-start-1)
   - [Operator](#operator)
   - [Time-Dependent Dynamics](#time-dependent-dynamics)
   - [Super-operator Representation](#super-operator-representation)
@@ -30,7 +30,7 @@
   - [Batch Simulation](#batch-simulation)
   - [Multi-GPU Multi-Node Execution](#multi-gpu-multi-node-execution)
   - [Examples](#examples)
-- **[Part 3: GPU Simulator Backends & Performance Options](#part-3-gpu-simulator-backends-&-performance-options)**
+- **[Part 3: GPU Simulator Backends & Performance Options](#part-3-gpu-simulator-backends--performance-options)**
   - [State Vector Simulators](#state-vector-simulators)
   - [Tensor Network Simulators](#tensor-network-simulators)
 - **[Part 4: Amazon Braket Backend](#part-4-amazon-braket-backend)**
