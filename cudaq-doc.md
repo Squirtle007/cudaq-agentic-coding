@@ -1,6 +1,6 @@
-# CUDA-Q Reference for AI Agents (Python)
+# CUDA-Q Reference for AI Agents
 
-> Combined from the NVIDIA CUDA-Q documentation (https://nvidia.github.io/cuda-quantum/latest/): the "CUDA-Q by Example" tutorials, the Dynamics Simulation guide, the GPU simulator backend pages, the Amazon Braket backend page, and the Python API reference. Python only; verified against the latest published docs.
+> Combined from the NVIDIA CUDA-Q documentation (https://nvidia.github.io/cuda-quantum/latest/): the "CUDA-Q by Example" tutorials, the Dynamics Simulation guide, the GPU simulator backend pages, the Amazon Braket backend page, and the Python API reference. Verified against the latest published docs.
 
 ## Contents
 
@@ -21,7 +21,13 @@
   - [14. Performance Optimizations](#14-performance-optimizations)
   - [15. Using Quantum Hardware Providers](#15-using-quantum-hardware-providers)
   - [16. When to Use sample vs. run](#16-when-to-use-sample-vs-run)
-- **[Part 2: Dynamics Simulation](#part-2-dynamics-simulation)**
+- **[Part 2: GPU Simulator Backends & Performance Options](#part-2-gpu-simulator-backends--performance-options)**
+  - [State Vector Simulators](#state-vector-simulators)
+  - [Tensor Network Simulators](#tensor-network-simulators)
+- **[Part 3: Amazon Braket Backend](#part-3-amazon-braket-backend)**
+  - [Setting Credentials](#setting-credentials)
+  - [Submitting](#submitting)
+- **[Part 4: Dynamics Simulation](#part-4-dynamics-simulation)**
   - [Quick Start](#quick-start-1)
   - [Operator](#operator)
   - [Time-Dependent Dynamics](#time-dependent-dynamics)
@@ -30,12 +36,6 @@
   - [Batch Simulation](#batch-simulation)
   - [Multi-GPU Multi-Node Execution](#multi-gpu-multi-node-execution)
   - [Examples](#examples)
-- **[Part 3: GPU Simulator Backends & Performance Options](#part-3-gpu-simulator-backends--performance-options)**
-  - [State Vector Simulators](#state-vector-simulators)
-  - [Tensor Network Simulators](#tensor-network-simulators)
-- **[Part 4: Amazon Braket Backend](#part-4-amazon-braket-backend)**
-  - [Setting Credentials](#setting-credentials)
-  - [Submitting](#submitting)
 - **[Part 5: Python API Reference](#part-5-python-api-reference)**
   - [Program Construction](#program-construction)
   - [Kernel Execution](#kernel-execution)
@@ -51,13 +51,11 @@
 
 ## Part 1: CUDA-Q by Example
 
-> Compiled from the [CUDA-Q by Example](https://nvidia.github.io/cuda-quantum/latest/using/examples/examples.html) section of the NVIDIA CUDA-Q documentation. Python only; code blocks are taken verbatim from the official example sources in the [CUDA-Q repository](https://github.com/NVIDIA/cuda-quantum).
+> Compiled from the [CUDA-Q by Example](https://nvidia.github.io/cuda-quantum/latest/using/examples/examples.html) section of the NVIDIA CUDA-Q documentation. Code blocks are taken verbatim from the official example sources in the [CUDA-Q repository](https://github.com/NVIDIA/cuda-quantum).
 
 ### 1. Introduction
 
 > Source: https://nvidia.github.io/cuda-quantum/latest/using/examples/introduction.html
-
-Welcome to CUDA-Q! On this page we will illustrate CUDA-Q with several examples.
 
 Quantum programs are constructed through CUDA-Q's `Kernel` API; invoking a kernel's methods builds a program that is then executed by calling, for example, `cudaq.sample`:
 
@@ -585,7 +583,7 @@ Python — rather than a classical value. Measuring a single qubit returns one
 handle; measuring a `qvector` returns a vector of handles. A handle
 records a measurement event and defers reading its classical value, so the
 same measurement can drive mid-circuit conditional logic and
-quantum-error-correction declarations (see [dem from kernel](https://nvidia.github.io/cuda-quantum/latest/using/examples/dem_from_kernel.html)).
+quantum-error-correction declarations (see [dem from kernel](#12-detector-error-models)).
 
 A handle is *discriminated* into its classical bit by using it in a boolean
 context inside the kernel — for example the `if (b0)` test in the
@@ -2084,7 +2082,7 @@ The supported targets are those marked with `*` in the
 [simulator table](https://nvidia.github.io/cuda-quantum/latest/using/backends/simulators.html),
 plus `density-matrix-cpu` and `qpp-cpu`:
 
-Supported targets: `nvidia` (single GPU, general purpose), `nvidia, option=mgpu` (33+ qubits), `nvidia, option=mqpu` (multi-QPU async distribution), `tensornet` (exact, shallow circuits, thousands of qubits), `tensornet-mps` (approximate MPS, square-shaped circuits), and `qpp-cpu` (CPU, < 28 qubits) — see Part 3 for full backend details.
+Supported targets: `nvidia` (single GPU, general purpose), `nvidia, option=mgpu` (33+ qubits), `nvidia, option=mqpu` (multi-QPU async distribution), `tensornet` (exact, shallow circuits, thousands of qubits), `tensornet-mps` (approximate MPS, square-shaped circuits), and `qpp-cpu` (CPU, < 28 qubits) — see Part 2 for full backend details.
 
 Set the target:
 
@@ -2127,7 +2125,7 @@ as text in Stim's standard
 [.dem file format](https://github.com/quantumlib/Stim/blob/main/doc/file_format_dem_detector_error_model.md),
 which `stim.DetectorErrorModel` parses back into a decoder-ready model. The
 measurements that feed the declarations are *measurement handles*
-([measuring kernels](https://nvidia.github.io/cuda-quantum/latest/using/examples/measuring_kernels.html)).
+([measuring kernels](#4-measuring-kernels)).
 
 Three kernel-side declarations are available:
 `detector(m0, m1, ...)` declares one detector as a parity
@@ -2143,7 +2141,7 @@ In-kernel `apply_noise` seeds the error mechanisms. Each call applies a
 single-qubit bit-flip channel (`cudaq::x_error` in C++, `cudaq.XError` in
 Python) that applies a Pauli `X` with the given probability, so a flipped
 data qubit shows up as a parity change in the next `detectors` pair.
-See the [Python API reference](https://nvidia.github.io/cuda-quantum/latest/api/languages/python_api.html) for `apply_noise`
+See the [Python API reference](#part-5-python-api-reference) for `apply_noise`
 and the other predefined noise channels.
 
 ```python
@@ -2258,7 +2256,7 @@ This section highlights features advanced users can leverage to increase perform
 
 #### Gate Fusion
 
-Gate fusion combines consecutive gates into a single operation (see figure below; fusion defaults and environment variables are covered in Part 3). Set `CUDAQ_MGPU_FUSE` to select the fusion degree, e.g. `CUDAQ_MGPU_FUSE=4 python c2h2VQE.py --target nvidia --target-option fp64,mgpu`
+Gate fusion combines consecutive gates into a single operation (see figure below; fusion defaults and environment variables are covered in Part 2). Set `CUDAQ_MGPU_FUSE` to select the fusion degree, e.g. `CUDAQ_MGPU_FUSE=4 python c2h2VQE.py --target nvidia --target-option fp64,mgpu`
 
 ![figure](https://nvidia.github.io/cuda-quantum/latest/_images/gate-fuse.png)
 
@@ -3272,7 +3270,312 @@ print(f"Teleportation succeeded on all {len(runs)} shots")
 
 ---
 
-## Part 2: Dynamics Simulation
+## Part 2: GPU Simulator Backends & Performance Options
+
+> Sources:
+> - https://nvidia.github.io/cuda-quantum/latest/using/backends/sims/svsims.html (State Vector Simulators)
+> - https://nvidia.github.io/cuda-quantum/latest/using/backends/sims/tnsims.html (Tensor Network Simulators)
+
+> **Note (applies to all GPU-accelerated backends below):** an NVIDIA GPU and CUDA runtime libraries are required; missing CUDA dependencies surface as an `Invalid simulator requested` error. MPI-based configurations (`mgpu`, multi-GPU `tensornet`) additionally require an MPI installation — missing MPI surfaces as a `failed to launch kernel` error. See [Dependencies and Compatibility](https://nvidia.github.io/cuda-quantum/latest/using/install/local_installation.html#dependencies-and-compatibility) for how to install these dependencies. A target set in the application code (`cudaq.set_target(...)`) overrides the `--target` command-line flag given at program invocation. Environment variables must be set before setting the target or running `import cudaq`.
+
+### State Vector Simulators
+
+#### CPU (`qpp-cpu`)
+
+The `qpp-cpu` backend provides a state vector simulator based on the CPU-only, OpenMP threaded [Q++](https://github.com/softwareqinc/qpp) library. This backend is good for basic testing and experimentation with just a few qubits, but performs poorly for all but the smallest simulation and is the default target when running on CPU-only systems.
+
+To execute a program on the `qpp-cpu` target even if a GPU-accelerated backend is available, use the following command:
+
+```bash
+python3 program.py [...] --target qpp-cpu
+```
+
+The target can also be defined in the application code by calling
+
+```python
+cudaq.set_target('qpp-cpu')
+```
+
+#### Single-GPU (`nvidia`)
+
+The `nvidia` backend provides a state vector simulator accelerated with the `cuStateVec` library. The [cuStateVec documentation](https://docs.nvidia.com/cuda/cuquantum/latest/custatevec/index.html) provides a detailed explanation for how the simulations are performed on the GPU.
+
+The `nvidia` target supports multiple configurable options including specification of floating point precision.
+
+To execute a program on the `nvidia` backend, use the following commands:
+
+```bash
+# Single Precision (Default):
+python3 program.py [...] --target nvidia --target-option fp32
+
+# Double Precision:
+python3 program.py [...] --target nvidia --target-option fp64
+```
+
+The target can also be defined in the application code by calling
+
+```python
+cudaq.set_target('nvidia', option='fp64')
+```
+
+In the single-GPU mode, the `nvidia` backend provides the following environment variable options. It is worth drawing attention to gate fusion, a powerful tool for improving simulation performance, which is discussed in greater detail in [Performance Optimizations](#14-performance-optimizations).
+
+**Environment variable options supported in single-GPU mode**
+
+| Option | Value | Description |
+| --- | --- | --- |
+| `CUDAQ_FUSION_MAX_QUBITS` | positive integer | The max number of qubits used for gate fusion. The default value depends on [GPU Compute Capability](https://developer.nvidia.com/cuda-gpus) (CC) and the floating point precision selected for the simulator, as specified in the Default Gate Fusion Size table below. |
+| `CUDAQ_FUSION_DIAGONAL_GATE_MAX_QUBITS` | integer greater than or equal to -1 | The max number of qubits used for diagonal gate fusion. The default value is set to `-1` and the fusion size will be automatically adjusted for the better performance. If 0, the gate fusion for diagonal gates is disabled. |
+| `CUDAQ_FUSION_NUM_HOST_THREADS` | positive integer | Number of CPU threads used for circuit processing. The default value is `8`. |
+| `CUDAQ_MAX_CPU_MEMORY_GB` | non-negative integer, or `NONE` | CPU memory size (in GB) allowed for state-vector migration. `NONE` means unlimited (up to physical memory constraints). Default is 0GB (disabled, variable is not set to any value). |
+| `CUDAQ_MAX_GPU_MEMORY_GB` | positive integer, or `NONE` | GPU memory (in GB) allowed for on-device state-vector allocation. As the state-vector size exceeds this limit, host memory will be utilized for migration. `NONE` means unlimited (up to physical memory constraints). This is the default. |
+| `CUDAQ_ALLOW_FP32_EMULATED` | `TRUE` (`1`, `ON`) or `FALSE` (`0`, `OFF`) | [Blackwell (compute capability 10.0+) only] Enable or disable floating point math emulation. If enabled, allows `FP32` emulation kernels using `BFloat16` (`BF16`) whenever possible. Enabled by default. |
+| `CUDAQ_ENABLE_MEMPOOL` | `TRUE` (`1`, `ON`) or `FALSE` (`0`, `OFF`) | Enable or disable [CUDA memory pool](https://developer.nvidia.com/blog/using-cuda-stream-ordered-memory-allocator-part-1/#memory_pools) for state vector allocation/deallocation. Enabled by default. |
+
+> **Deprecated since version 0.8:** The `nvidia-fp64` target, which is equivalent to setting the `fp64` option on the `nvidia` target, is deprecated and will be removed in a future release.
+
+> **Note:** In host-device simulation (i.e., `CUDAQ_MAX_CPU_MEMORY_GB` is not 0), the backend automatically switches between inner product (default) and operator matrix-based methods for expectation calculations (`cudaq::observe`) depending on whether a clone of the state can be allocated or not.
+>
+> For example, when `CUDAQ_MAX_GPU_MEMORY_GB` is unconstrained, the quantum state vector would consume all device memory before utilizing host memory. Thus, the backend would fall back to the operator matrix-based approach as cloning the state is not possible. For performance reasons, only Pauli operator matrices of up to 8 qubits (identity padding not included) are allowed in this mode. This constraint can be relaxed by setting the `CUDAQ_MATRIX_EXP_VAL_MAX_SIZE` environment variable. Users would need to take into account the full operator matrix size when increasing this setting.
+
+#### Multi-GPU multi-node (`nvidia`, option `mgpu`)
+
+The `nvidia` backend also provides a state vector simulator accelerated with the `cuStateVec` library with support for Multi-GPU, Multi-node distribution of the state vector.
+
+This mode is required when the state vector cannot fit in a single GPU's memory. It runs within an MPI context (adjust `-np` to the available GPU resources):
+
+See the [Divisive Clustering](https://nvidia.github.io/cuda-quantum/latest/applications/python/divisive_clustering_coresets.html) application to see how this backend can be used in practice.
+
+```bash
+# Double precision simulation:
+mpiexec -np 2 python3 program.py [...] --target nvidia --target-option fp64,mgpu
+
+# Single precision simulation:
+mpiexec -np 2 python3 program.py [...] --target nvidia --target-option fp32,mgpu
+```
+
+> **Note:** If you installed CUDA-Q via `pip`, you will need to install the necessary MPI dependencies separately; please follow the instructions for installing dependencies in the [Project Description](https://pypi.org/project/cuda-quantum/#description).
+
+In addition to using MPI in the simulator, you can use it in your application code by installing [mpi4py](https://mpi4py.readthedocs.io/), and invoking the program with the command
+
+```bash
+mpiexec -np 2 python3 -m mpi4py program.py [...] --target nvidia --target-option fp64,mgpu
+```
+
+The target can also be defined in the application code by calling
+
+```python
+cudaq.set_target('nvidia', option='mgpu,fp64')
+```
+
+> **Note:**
+> - The order of the option settings are interchangeable. For example, `cudaq.set_target('nvidia', option='mgpu,fp64')` is equivalent to `cudaq.set_target('nvidia', option='fp64,mgpu')`.
+> - The `nvidia` target has single-precision as the default setting. Thus, using `option='mgpu'` implies that `option='mgpu,fp32'`.
+
+The number of processes and nodes should be always power-of-2.
+
+Host-device state vector migration is also supported in the multi-GPU multi-node configuration.
+
+In addition to those environment variable options supported in the single-GPU mode, the `nvidia` backend provides the following environment variable options particularly for the multi-node multi-GPU configuration.
+
+**Additional environment variable options for multi-node multi-GPU mode**
+
+| Option | Value | Description |
+| --- | --- | --- |
+| `CUDAQ_MGPU_LIB_MPI` | string | The shared library name for inter-process communication. The default value is `libmpi.so`. |
+| `CUDAQ_MGPU_COMM_PLUGIN_TYPE` | `AUTO`, `EXTERNAL`, `OpenMPI`, or `MPICH` | Selecting `cuStateVec` `CommPlugin` for inter-process communication. The default is `AUTO`. If `EXTERNAL` is selected, `CUDAQ_MGPU_LIB_MPI` should point to an implementation of the `cuStateVec` `CommPlugin` interface. |
+| `CUDAQ_MGPU_NQUBITS_THRESH` | positive integer | The qubit count threshold where state vector distribution is activated. Below this threshold, simulation is performed as independent (non-distributed) tasks across all MPI processes for optimal performance. Default is 25. |
+| `CUDAQ_MGPU_FUSE` | positive integer | The max number of qubits used for gate fusion. The default value depends on GPU Compute Capability (CC) and the floating point precision selected for the simulator, as specified in the Default Gate Fusion Size table below. |
+| `CUDAQ_MGPU_P2P_DEVICE_BITS` | positive integer | Specify the number of GPUs that can communicate by using GPUDirect P2P. Default value is 0 (P2P communication is disabled). |
+| `CUDAQ_GPU_FABRIC` | `MNNVL`, `NVL`, `NONE`, or NVLink domain size (power of 2 integer) | Automatically set the number of P2P device bits based on the total number of processes when multi-node NVLink (`MNNVL`) is selected; or the number of processes per node when NVLink (`NVL`) is selected; or disable P2P (with `NONE`); or a specific NVLink domain size. |
+| `CUDAQ_GLOBAL_INDEX_BITS` | comma-separated list of positive integers | Specify the network structure (faster to slower). E.g., for 32 MPI processes arranged as 4 groups of 8 with faster intra-group communication, set `3,2`: the `3` (= `log2(8)`) is the 8 fast-communicating processes per group, the `2` the 4 groups; the list sums to 5 (`2^5 = 32` processes). If unspecified, set based on P2P device bits. |
+| `CUDAQ_HOST_DEVICE_MIGRATION_LEVEL` | positive integer | Position at which the migration index bits (CPU-GPU data transfers) are inserted into the `CUDAQ_GLOBAL_INDEX_BITS` list. If unset, they are appended at the end — a default optimized for systems with fast GPU-GPU interconnects (NVLink, InfiniBand, etc.) |
+| `CUDAQ_DATA_TRANSFER_BUFFER_BITS` | positive integer greater than or equal to 24 | Specify the temporary buffer size (`1 << CUDAQ_DATA_TRANSFER_BUFFER_BITS` bytes) for inter-node data transfer. The default is set to 26 (64 MB). The minimum allowed value is 24 (16 MB). Depending on systems, setting a larger value to `CUDAQ_DATA_TRANSFER_BUFFER_BITS` can accelerate inter-node data transfers. |
+
+> **Deprecated since version 0.8:** The `nvidia-mgpu` backend, which is equivalent to the multi-node multi-GPU double-precision option (`mgpu,fp64`) of the `nvidia` target, is deprecated and will be removed in a future release.
+
+**Default Gate Fusion Size**
+
+| Compute Capability | GPU | Default Gate Fusion Size |
+| --- | --- | --- |
+| 8.0 | NVIDIA A100 | 4 (`fp32`) or 5 (`fp64`) |
+| 9.0 | NVIDIA H100, H200, GH200 | 5 (`fp32`) or 6 (`fp64`) |
+| 10.0 | NVIDIA GB200, B200 | 5 (`fp32`) or 4 (`fp64`) |
+| 10.3 | NVIDIA B300 | 5 (`fp32`) or 1 (`fp64`) |
+| Others | | 4 (`fp32` and `fp64`) |
+
+Gate fusion combines multiple gates at runtime — e.g., `x(qubit0)` and `x(qubit1)` become a single 4x4 matrix operation on the state vector instead of two 2x2 operations — reducing GPU memory bandwidth since the state vector is transferred in and out of memory fewer times. By default up to 4 gates are fused for single-GPU and up to 6 for multi-GPU simulations. The fusion level can **significantly** affect performance of some circuits; override it by setting `CUDAQ_MGPU_FUSE`:
+
+```bash
+CUDAQ_MGPU_FUSE=5 mpiexec -np 2 python3 program.py [...] --target nvidia --target-option mgpu,fp64
+```
+
+> **Note:** On multi-node systems without `MNNVL` support, the `nvidia` target in `mgpu` mode may fail to allocate memory. Users can disable `MNNVL` fabric-based memory sharing by setting the environment variable `UBACKEND_USE_FABRIC_HANDLE=0`.
+
+### Tensor Network Simulators
+
+CUDA-Q provides a couple of tensor-network simulator backends accelerated with the `cuTensorNet` library. Detailed technical information on the simulator can be found in the [cuTensorNet documentation](https://docs.nvidia.com/cuda/cuquantum/latest/cutensornet/index.html).
+
+Tensor network simulators are suitable for large-scale simulation of certain classes of quantum circuits involving many qubits beyond the memory limit of state vector based simulators. For example, computing the expectation value of a Hamiltonian via `cudaq.observe` can be performed efficiently, thanks to `cuTensorNet` contraction optimization capability. On the other hand, conditional circuits, i.e., those with mid-circuit measurements or reset, despite being supported by both backends, may result in poor performance.
+
+#### Multi-GPU multi-node (`tensornet`)
+
+The `tensornet` backend represents quantum states and circuits as tensor networks in an exact form (no approximation). Measurement samples and expectation values are computed via tensor network contractions. This backend supports multi-GPU, multi-node distribution of tensor operations required to evaluate and simulate the circuit.
+
+The `tensornet` target supports both single and double floating point precision.
+
+To execute a program on the `tensornet` target using a *single GPU*, use the following commands:
+
+```bash
+# Double Precision (Default):
+python3 program.py [...] --target tensornet
+
+# Single Precision:
+python3 program.py [...] --target tensornet --target-option fp32
+```
+
+The target can also be defined in the application code by calling
+
+```python
+cudaq.set_target('tensornet')                  # default double-precision
+cudaq.set_target('tensornet', option='fp32')   # single-precision
+```
+
+If you have *multiple GPUs* available on your system, you can use MPI to automatically distribute parallelization across the visible GPUs.
+
+> **Note:** If you installed the CUDA-Q Python wheels, distribution across multiple GPUs is currently not supported for this backend. We will add support for it in future releases. For more information, see this [GitHub issue](https://github.com/NVIDIA/cuda-quantum/issues/920).
+
+Use the following commands to enable distribution across multiple GPUs (adjust the value of the `-np` flag as needed to reflect available GPU resources on your system):
+
+```bash
+mpiexec -np 2 python3 program.py [...] --target tensornet
+```
+
+Or, using MPI in your application code with mpi4py:
+
+```bash
+mpiexec -np 2 python3 -m mpi4py program.py [...] --target tensornet
+```
+
+> **Note:** MPI parallelization on the `tensornet` backend requires CUDA-Q's MPI support. Please refer to the instructions on how to [enable MPI parallelization](https://nvidia.github.io/cuda-quantum/latest/using/install/local_installation.html#distributed-computing-with-mpi) within CUDA-Q. CUDA-Q containers are shipped with a pre-built MPI plugin; hence no additional setup is needed.
+
+> **Note:** If the `CUTENSORNET_COMM_LIB` environment variable is set following the activation procedure described in the [cuTensorNet documentation](https://docs.nvidia.com/cuda/cuquantum/latest/getting-started/index.html#from-nvidia-devzone), the cuTensorNet MPI plugin will take precedence over the builtin support from CUDA-Q.
+
+Specific aspects of the simulation can be configured by setting the following environment variables:
+
+*   **`CUDA_VISIBLE_DEVICES=X`**: Makes the process only see GPU X on multi-GPU nodes. Each MPI process must only see its own dedicated GPU. For example, if you run 8 MPI processes on a DGX system with 8 GPUs, each MPI process should be assigned its own dedicated GPU via `CUDA_VISIBLE_DEVICES` when invoking `mpiexec` (or `mpirun`) commands.
+*   **`CUDAQ_TIMING_TAGS=tags`**: When the environment variable includes 9 in the tag set, timing for the path-finding stage (Prepare) and contraction stage (Compute or Sample) are output for the user.
+*   **`CUDAQ_TENSORNET_CONTROLLED_RANK=X`**: Specify the number of controlled qubits whereby the full tensor body of the controlled gate is expanded. If the number of controlled qubits is greater than this value, the gate is applied as a controlled tensor operator to the tensor network state. Default value is 1.
+*   **`CUDAQ_TENSORNET_OBSERVE_CONTRACT_PATH_REUSE=X`**: Set this environment variable to `TRUE` (`ON`) or `FALSE` (`OFF`) to enable or disable contraction path reuse when computing expectation values. Default is `OFF`.
+*   **`CUDAQ_TENSORNET_NUM_HYPER_SAMPLES=X`**: Specify the number of hyper samples used in the tensor network contraction path finder. Default value is 8 if not specified. Increasing this value will increase the path-finding time, but can decrease the contraction time if a better quality path is found (and vice versa). Hyper samples are processed in parallel using multiple host threads.
+*   **`CUDAQ_TENSORNET_FIND_THREADS=X`**: Used to control the number of threads on the host used for path-finding. The default value is half of the available CPU hardware threads. For processors with 1 hardware thread per CPU core (no `SMT`), increasing this to equal the number of CPU cores can improve performance.
+*   **`CUDAQ_TENSORNET_FIND_LIMIT=X`**: Set this environment variable to `TRUE` (`ON`) or `FALSE` (`OFF`) to enable or disable a heuristic to limit the path-finding time based on the predicted contraction time. When on, increasing the number of hyper samples may have no effect beyond a certain threshold due to enforcement of the time limit. Default is `ON`.
+*   **`CUDAQ_TENSORNET_FIND_DETERMINISTIC=X`**: Set this environment variable to `TRUE` (`ON`) or `FALSE` (`OFF`) to enable or disable deterministic path-finding as controlled by the CUDA-Q `set_random_seed()` function. When on, the number of path-finding threads is limited to 1 and therefore this setting can significantly decrease performance. Default is `OFF`.
+
+> **Note:** Setting the `CUDAQ_TENSORNET_*` environment variables will override any corresponding environment variables used by the `cuTensorNet` library.
+
+#### Matrix product state (`tensornet-mps`)
+
+The `tensornet-mps` backend is based on the matrix product state (MPS) representation of the state vector/wave function, exploiting the sparsity in the tensor network via tensor decomposition techniques such as QR and SVD. As such, this backend is an approximate simulator, whereby the number of singular values may be truncated to keep the MPS size tractable. The `tensornet-mps` backend only supports single-GPU simulation. Its approximate nature allows the `tensornet-mps` backend to handle a large number of qubits for certain classes of quantum circuits on a relatively small memory footprint.
+
+The `tensornet-mps` target supports both single and double floating point precision.
+
+To execute a program on the `tensornet-mps` target, use the following commands:
+
+```bash
+# Double Precision (Default):
+python3 program.py [...] --target tensornet-mps
+
+# Single Precision:
+python3 program.py [...] --target tensornet-mps --target-option fp32
+```
+
+The target can also be defined in the application code by calling
+
+```python
+cudaq.set_target('tensornet-mps')                  # default double-precision
+cudaq.set_target('tensornet-mps', option='fp32')   # single-precision
+```
+
+Specific aspects of the simulation can be configured by defining the following environment variables:
+
+*   **`CUDAQ_MPS_MAX_BOND=X`**: The maximum number of singular values to keep (fixed extent truncation). Default: 64.
+*   **`CUDAQ_MPS_ABS_CUTOFF=X`**: The cutoff for the largest singular value during truncation. Eigenvalues that are smaller will be trimmed out. Default: 1e-5.
+*   **`CUDAQ_MPS_RELATIVE_CUTOFF=X`**: The cutoff for the maximal singular value relative to the largest eigenvalue. Eigenvalues that are smaller than this fraction of the largest singular value will be trimmed out. Default: 1e-5.
+*   **`CUDAQ_MPS_SVD_ALGO=X`**: The SVD algorithm to use. Valid values are: `GESVD` (QR algorithm), `GESVDJ` (Jacobi method), `GESVDP` ([polar decomposition](https://epubs.siam.org/doi/10.1137/090774999)), `GESVDR` ([randomized methods](https://epubs.siam.org/doi/10.1137/090771806)). Default: `GESVDJ`.
+*   **`CUDAQ_MPS_GAUGE=X`**: The optional gauge option to improve accuracy of the MPS simulation. Valid values are: `FREE` (gauge is disabled) or `SIMPLE` (simple update algorithm). By default, no gauge configuration is set, thus the default `cuquantum` MPS setting will be used (see the [cuQuantum doc](https://docs.nvidia.com/cuda/cuquantum/latest/cutensornet/api/types.html#cutensornetstatempsgaugeoption-t)).
+
+> **Note:** The parallelism of Jacobi method (the default `CUDAQ_MPS_SVD_ALGO` setting) gives GPU better performance on small and medium size matrices. If you expect a large number of singular values (e.g., increasing the `CUDAQ_MPS_MAX_BOND` setting), please adjust the `CUDAQ_MPS_SVD_ALGO` setting accordingly.
+
+> **Note:** Both `tensornet-mps` and `tensornet` backends will allocate a scratch space on GPU device memory for their operations. For example, the scratch space can be used to store the contracted reduced density matrix to generate measurement bit strings.
+>
+> By default, these backends reserve 50% of free memory for their scratch space. This ratio can be customized using the `CUDAQ_TENSORNET_SCRATCH_SIZE_PERCENTAGE` environment variable. Valid setting must be between 5% and 95%. Users may encounter runtime errors, e.g., insufficient workspace or CUDA memory allocation errors, when setting `CUDAQ_TENSORNET_SCRATCH_SIZE_PERCENTAGE` toward its limits.
+
+> **Note:** All floating-point data, e.g., gate matrices, noise channel Kraus operator matrices, contracted state vector, etc., are converted to the target's precision setting, if not already in that precision format. Hence, users would need to take into account potential precision loss when using the single precision setting.
+
+---
+
+## Part 3: Amazon Braket Backend
+
+> Source: https://nvidia.github.io/cuda-quantum/latest/using/backends/cloud/braket.html
+
+[Amazon Braket](https://aws.amazon.com/braket/) is a fully managed AWS service which provides Jupyter notebook environments, high-performance quantum circuit simulators, and secure, on-demand access to various quantum computers. To get started, users must enable Amazon Braket in their AWS account by following [these instructions](https://docs.aws.amazon.com/braket/latest/developerguide/braket-enable-overview.html). See the [Amazon Braket Documentation](https://docs.aws.amazon.com/braket/) and [Examples](https://github.com/amazon-braket/amazon-braket-examples/tree/main/examples/nvidia_cuda_q); available devices and regions are listed [here](https://docs.aws.amazon.com/braket/latest/developerguide/braket-devices.html).
+
+CUDA-Q programs can run on Amazon Braket as a [Hybrid Job](https://docs.aws.amazon.com/braket/latest/developerguide/braket-what-is-hybrid-job.html) — see the [Hybrid Jobs getting-started guide](https://docs.aws.amazon.com/braket/latest/developerguide/braket-jobs-first.html) and the [CUDA-Q on Braket guide](https://docs.aws.amazon.com/braket/latest/developerguide/braket-using-cuda-q.html).
+
+### Setting Credentials
+
+After enabling Amazon Braket in AWS, set credentials using any of the documented [methods](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html). The simplest is the [AWS CLI](https://aws.amazon.com/cli/):
+
+```bash
+aws configure
+```
+
+Alternatively, set the following environment variables:
+
+```bash
+export AWS_DEFAULT_REGION="<region>"
+export AWS_ACCESS_KEY_ID="<key_id>"
+export AWS_SECRET_ACCESS_KEY="<access_key>"
+export AWS_SESSION_TOKEN="<token>"
+```
+
+### Submitting
+
+Select the submission target with `cudaq.set_target()`:
+
+```python
+cudaq.set_target("braket")
+```
+
+By default, jobs are submitted to the state vector simulator, `SV1`.
+
+To specify which Amazon Braket device to use, set the `machine` parameter.
+
+```python
+device_arn = "arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet"
+cudaq.set_target("braket", machine=device_arn)
+```
+
+where `arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet` refers to the IQM Garnet QPU.
+
+To emulate the device locally, without submitting through the cloud, you can also set the `emulate` flag to `True`.
+
+```python
+cudaq.set_target("braket", emulate=True)
+```
+
+Set the number of shots for a kernel execution via the `shots_count` argument to `cudaq.sample` (default: 1000).
+
+```python
+cudaq.sample(kernel, shots_count=100)
+```
+
+For a complete example, see the Amazon Braket section of [15. Using Quantum Hardware Providers](#15-using-quantum-hardware-providers) in Part 1.
+
+---
+
+## Part 4: Dynamics Simulation
 
 > Source: https://nvidia.github.io/cuda-quantum/latest/using/dynamics.html
 
@@ -3824,311 +4127,6 @@ Each process will return its own set of results. The user is responsible for gat
 ### Examples
 
 The [Dynamics Examples](https://nvidia.github.io/cuda-quantum/latest/using/examples/dynamics_examples.html) section of the docs contains a number of excellent dynamics examples demonstrating how to simulate basic physics models, specific qubit modalities, and utilize multi-GPU multi-Node capabilities.
-
----
-
-## Part 3: GPU Simulator Backends & Performance Options
-
-> Sources:
-> - https://nvidia.github.io/cuda-quantum/latest/using/backends/sims/svsims.html (State Vector Simulators)
-> - https://nvidia.github.io/cuda-quantum/latest/using/backends/sims/tnsims.html (Tensor Network Simulators)
-
-> **Note (applies to all GPU-accelerated backends below):** an NVIDIA GPU and CUDA runtime libraries are required; missing CUDA dependencies surface as an `Invalid simulator requested` error. MPI-based configurations (`mgpu`, multi-GPU `tensornet`) additionally require an MPI installation — missing MPI surfaces as a `failed to launch kernel` error. See [Dependencies and Compatibility](https://nvidia.github.io/cuda-quantum/latest/using/install/local_installation.html#dependencies-and-compatibility) for how to install these dependencies. A target set in the application code (`cudaq.set_target(...)`) overrides the `--target` command-line flag given at program invocation. Environment variables must be set before setting the target or running `import cudaq`.
-
-### State Vector Simulators
-
-#### CPU (`qpp-cpu`)
-
-The `qpp-cpu` backend provides a state vector simulator based on the CPU-only, OpenMP threaded [Q++](https://github.com/softwareqinc/qpp) library. This backend is good for basic testing and experimentation with just a few qubits, but performs poorly for all but the smallest simulation and is the default target when running on CPU-only systems.
-
-To execute a program on the `qpp-cpu` target even if a GPU-accelerated backend is available, use the following command:
-
-```bash
-python3 program.py [...] --target qpp-cpu
-```
-
-The target can also be defined in the application code by calling
-
-```python
-cudaq.set_target('qpp-cpu')
-```
-
-#### Single-GPU (`nvidia`)
-
-The `nvidia` backend provides a state vector simulator accelerated with the `cuStateVec` library. The [cuStateVec documentation](https://docs.nvidia.com/cuda/cuquantum/latest/custatevec/index.html) provides a detailed explanation for how the simulations are performed on the GPU.
-
-The `nvidia` target supports multiple configurable options including specification of floating point precision.
-
-To execute a program on the `nvidia` backend, use the following commands:
-
-```bash
-# Single Precision (Default):
-python3 program.py [...] --target nvidia --target-option fp32
-
-# Double Precision:
-python3 program.py [...] --target nvidia --target-option fp64
-```
-
-The target can also be defined in the application code by calling
-
-```python
-cudaq.set_target('nvidia', option='fp64')
-```
-
-In the single-GPU mode, the `nvidia` backend provides the following environment variable options. It is worth drawing attention to gate fusion, a powerful tool for improving simulation performance, which is discussed in greater detail in [Performance Optimizations](https://nvidia.github.io/cuda-quantum/latest/examples/python/performance_optimizations.html).
-
-**Environment variable options supported in single-GPU mode**
-
-| Option | Value | Description |
-| --- | --- | --- |
-| `CUDAQ_FUSION_MAX_QUBITS` | positive integer | The max number of qubits used for gate fusion. The default value depends on [GPU Compute Capability](https://developer.nvidia.com/cuda-gpus) (CC) and the floating point precision selected for the simulator, as specified in the Default Gate Fusion Size table below. |
-| `CUDAQ_FUSION_DIAGONAL_GATE_MAX_QUBITS` | integer greater than or equal to -1 | The max number of qubits used for diagonal gate fusion. The default value is set to `-1` and the fusion size will be automatically adjusted for the better performance. If 0, the gate fusion for diagonal gates is disabled. |
-| `CUDAQ_FUSION_NUM_HOST_THREADS` | positive integer | Number of CPU threads used for circuit processing. The default value is `8`. |
-| `CUDAQ_MAX_CPU_MEMORY_GB` | non-negative integer, or `NONE` | CPU memory size (in GB) allowed for state-vector migration. `NONE` means unlimited (up to physical memory constraints). Default is 0GB (disabled, variable is not set to any value). |
-| `CUDAQ_MAX_GPU_MEMORY_GB` | positive integer, or `NONE` | GPU memory (in GB) allowed for on-device state-vector allocation. As the state-vector size exceeds this limit, host memory will be utilized for migration. `NONE` means unlimited (up to physical memory constraints). This is the default. |
-| `CUDAQ_ALLOW_FP32_EMULATED` | `TRUE` (`1`, `ON`) or `FALSE` (`0`, `OFF`) | [Blackwell (compute capability 10.0+) only] Enable or disable floating point math emulation. If enabled, allows `FP32` emulation kernels using `BFloat16` (`BF16`) whenever possible. Enabled by default. |
-| `CUDAQ_ENABLE_MEMPOOL` | `TRUE` (`1`, `ON`) or `FALSE` (`0`, `OFF`) | Enable or disable [CUDA memory pool](https://developer.nvidia.com/blog/using-cuda-stream-ordered-memory-allocator-part-1/#memory_pools) for state vector allocation/deallocation. Enabled by default. |
-
-> **Deprecated since version 0.8:** The `nvidia-fp64` target, which is equivalent to setting the `fp64` option on the `nvidia` target, is deprecated and will be removed in a future release.
-
-> **Note:** In host-device simulation (i.e., `CUDAQ_MAX_CPU_MEMORY_GB` is not 0), the backend automatically switches between inner product (default) and operator matrix-based methods for expectation calculations (`cudaq::observe`) depending on whether a clone of the state can be allocated or not.
->
-> For example, when `CUDAQ_MAX_GPU_MEMORY_GB` is unconstrained, the quantum state vector would consume all device memory before utilizing host memory. Thus, the backend would fall back to the operator matrix-based approach as cloning the state is not possible. For performance reasons, only Pauli operator matrices of up to 8 qubits (identity padding not included) are allowed in this mode. This constraint can be relaxed by setting the `CUDAQ_MATRIX_EXP_VAL_MAX_SIZE` environment variable. Users would need to take into account the full operator matrix size when increasing this setting.
-
-#### Multi-GPU multi-node (`nvidia`, option `mgpu`)
-
-The `nvidia` backend also provides a state vector simulator accelerated with the `cuStateVec` library with support for Multi-GPU, Multi-node distribution of the state vector.
-
-This mode is required when the state vector cannot fit in a single GPU's memory. It runs within an MPI context (adjust `-np` to the available GPU resources):
-
-See the [Divisive Clustering](https://nvidia.github.io/cuda-quantum/latest/applications/python/divisive_clustering_coresets.html) application to see how this backend can be used in practice.
-
-```bash
-# Double precision simulation:
-mpiexec -np 2 python3 program.py [...] --target nvidia --target-option fp64,mgpu
-
-# Single precision simulation:
-mpiexec -np 2 python3 program.py [...] --target nvidia --target-option fp32,mgpu
-```
-
-> **Note:** If you installed CUDA-Q via `pip`, you will need to install the necessary MPI dependencies separately; please follow the instructions for installing dependencies in the [Project Description](https://pypi.org/project/cuda-quantum/#description).
-
-In addition to using MPI in the simulator, you can use it in your application code by installing [mpi4py](https://mpi4py.readthedocs.io/), and invoking the program with the command
-
-```bash
-mpiexec -np 2 python3 -m mpi4py program.py [...] --target nvidia --target-option fp64,mgpu
-```
-
-The target can also be defined in the application code by calling
-
-```python
-cudaq.set_target('nvidia', option='mgpu,fp64')
-```
-
-> **Note:**
-> - The order of the option settings are interchangeable. For example, `cudaq.set_target('nvidia', option='mgpu,fp64')` is equivalent to `cudaq.set_target('nvidia', option='fp64,mgpu')`.
-> - The `nvidia` target has single-precision as the default setting. Thus, using `option='mgpu'` implies that `option='mgpu,fp32'`.
-
-The number of processes and nodes should be always power-of-2.
-
-Host-device state vector migration is also supported in the multi-GPU multi-node configuration.
-
-In addition to those environment variable options supported in the single-GPU mode, the `nvidia` backend provides the following environment variable options particularly for the multi-node multi-GPU configuration.
-
-**Additional environment variable options for multi-node multi-GPU mode**
-
-| Option | Value | Description |
-| --- | --- | --- |
-| `CUDAQ_MGPU_LIB_MPI` | string | The shared library name for inter-process communication. The default value is `libmpi.so`. |
-| `CUDAQ_MGPU_COMM_PLUGIN_TYPE` | `AUTO`, `EXTERNAL`, `OpenMPI`, or `MPICH` | Selecting `cuStateVec` `CommPlugin` for inter-process communication. The default is `AUTO`. If `EXTERNAL` is selected, `CUDAQ_MGPU_LIB_MPI` should point to an implementation of the `cuStateVec` `CommPlugin` interface. |
-| `CUDAQ_MGPU_NQUBITS_THRESH` | positive integer | The qubit count threshold where state vector distribution is activated. Below this threshold, simulation is performed as independent (non-distributed) tasks across all MPI processes for optimal performance. Default is 25. |
-| `CUDAQ_MGPU_FUSE` | positive integer | The max number of qubits used for gate fusion. The default value depends on [GPU Compute Capability](https://developer.nvidia.com/cuda-gpus) (CC) and the floating point precision selected for the simulator, as specified in the Default Gate Fusion Size table below. |
-| `CUDAQ_MGPU_P2P_DEVICE_BITS` | positive integer | Specify the number of GPUs that can communicate by using GPUDirect P2P. Default value is 0 (P2P communication is disabled). |
-| `CUDAQ_GPU_FABRIC` | `MNNVL`, `NVL`, `NONE`, or NVLink domain size (power of 2 integer) | Automatically set the number of P2P device bits based on the total number of processes when multi-node NVLink (`MNNVL`) is selected; or the number of processes per node when NVLink (`NVL`) is selected; or disable P2P (with `NONE`); or a specific NVLink domain size. |
-| `CUDAQ_GLOBAL_INDEX_BITS` | comma-separated list of positive integers | Specify the network structure (faster to slower). E.g., for 32 MPI processes arranged as 4 groups of 8 with faster intra-group communication, set `3,2`: the `3` (= `log2(8)`) is the 8 fast-communicating processes per group, the `2` the 4 groups; the list sums to 5 (`2^5 = 32` processes). If unspecified, set based on P2P device bits. |
-| `CUDAQ_HOST_DEVICE_MIGRATION_LEVEL` | positive integer | Position at which the migration index bits (CPU-GPU data transfers) are inserted into the `CUDAQ_GLOBAL_INDEX_BITS` list. If unset, they are appended at the end — a default optimized for systems with fast GPU-GPU interconnects (NVLink, InfiniBand, etc.) |
-| `CUDAQ_DATA_TRANSFER_BUFFER_BITS` | positive integer greater than or equal to 24 | Specify the temporary buffer size (`1 << CUDAQ_DATA_TRANSFER_BUFFER_BITS` bytes) for inter-node data transfer. The default is set to 26 (64 MB). The minimum allowed value is 24 (16 MB). Depending on systems, setting a larger value to `CUDAQ_DATA_TRANSFER_BUFFER_BITS` can accelerate inter-node data transfers. |
-
-> **Deprecated since version 0.8:** The `nvidia-mgpu` backend, which is equivalent to the multi-node multi-GPU double-precision option (`mgpu,fp64`) of the `nvidia` target, is deprecated and will be removed in a future release.
-
-**Default Gate Fusion Size**
-
-| Compute Capability | GPU | Default Gate Fusion Size |
-| --- | --- | --- |
-| 8.0 | NVIDIA A100 | 4 (`fp32`) or 5 (`fp64`) |
-| 9.0 | NVIDIA H100, H200, GH200 | 5 (`fp32`) or 6 (`fp64`) |
-| 10.0 | NVIDIA GB200, B200 | 5 (`fp32`) or 4 (`fp64`) |
-| 10.3 | NVIDIA B300 | 5 (`fp32`) or 1 (`fp64`) |
-| Others | | 4 (`fp32` and `fp64`) |
-
-Gate fusion combines multiple gates at runtime — e.g., `x(qubit0)` and `x(qubit1)` become a single 4x4 matrix operation on the state vector instead of two 2x2 operations — reducing GPU memory bandwidth since the state vector is transferred in and out of memory fewer times. By default up to 4 gates are fused for single-GPU and up to 6 for multi-GPU simulations. The fusion level can **significantly** affect performance of some circuits; override it by setting `CUDAQ_MGPU_FUSE`:
-
-```bash
-CUDAQ_MGPU_FUSE=5 mpiexec -np 2 python3 program.py [...] --target nvidia --target-option mgpu,fp64
-```
-
-> **Note:** On multi-node systems without `MNNVL` support, the `nvidia` target in `mgpu` mode may fail to allocate memory. Users can disable `MNNVL` fabric-based memory sharing by setting the environment variable `UBACKEND_USE_FABRIC_HANDLE=0`.
-
-### Tensor Network Simulators
-
-CUDA-Q provides a couple of tensor-network simulator backends accelerated with the `cuTensorNet` library. Detailed technical information on the simulator can be found in the [cuTensorNet documentation](https://docs.nvidia.com/cuda/cuquantum/latest/cutensornet/index.html).
-
-Tensor network simulators are suitable for large-scale simulation of certain classes of quantum circuits involving many qubits beyond the memory limit of state vector based simulators. For example, computing the expectation value of a Hamiltonian via `cudaq.observe` can be performed efficiently, thanks to `cuTensorNet` contraction optimization capability. On the other hand, conditional circuits, i.e., those with mid-circuit measurements or reset, despite being supported by both backends, may result in poor performance.
-
-#### Multi-GPU multi-node (`tensornet`)
-
-The `tensornet` backend represents quantum states and circuits as tensor networks in an exact form (no approximation). Measurement samples and expectation values are computed via tensor network contractions. This backend supports multi-GPU, multi-node distribution of tensor operations required to evaluate and simulate the circuit.
-
-The `tensornet` target supports both single and double floating point precision.
-
-To execute a program on the `tensornet` target using a *single GPU*, use the following commands:
-
-```bash
-# Double Precision (Default):
-python3 program.py [...] --target tensornet
-
-# Single Precision:
-python3 program.py [...] --target tensornet --target-option fp32
-```
-
-The target can also be defined in the application code by calling
-
-```python
-cudaq.set_target('tensornet')                  # default double-precision
-cudaq.set_target('tensornet', option='fp32')   # single-precision
-```
-
-If you have *multiple GPUs* available on your system, you can use MPI to automatically distribute parallelization across the visible GPUs.
-
-> **Note:** If you installed the CUDA-Q Python wheels, distribution across multiple GPUs is currently not supported for this backend. We will add support for it in future releases. For more information, see this [GitHub issue](https://github.com/NVIDIA/cuda-quantum/issues/920).
-
-Use the following commands to enable distribution across multiple GPUs (adjust the value of the `-np` flag as needed to reflect available GPU resources on your system):
-
-```bash
-mpiexec -np 2 python3 program.py [...] --target tensornet
-```
-
-Or, using MPI in your application code with [mpi4py](https://mpi4py.readthedocs.io/):
-
-```bash
-mpiexec -np 2 python3 -m mpi4py program.py [...] --target tensornet
-```
-
-> **Note:** MPI parallelization on the `tensornet` backend requires CUDA-Q's MPI support. Please refer to the instructions on how to [enable MPI parallelization](https://nvidia.github.io/cuda-quantum/latest/using/install/local_installation.html#distributed-computing-with-mpi) within CUDA-Q. CUDA-Q containers are shipped with a pre-built MPI plugin; hence no additional setup is needed.
-
-> **Note:** If the `CUTENSORNET_COMM_LIB` environment variable is set following the activation procedure described in the [cuTensorNet documentation](https://docs.nvidia.com/cuda/cuquantum/latest/getting-started/index.html#from-nvidia-devzone), the cuTensorNet MPI plugin will take precedence over the builtin support from CUDA-Q.
-
-Specific aspects of the simulation can be configured by setting the following environment variables:
-
-*   **`CUDA_VISIBLE_DEVICES=X`**: Makes the process only see GPU X on multi-GPU nodes. Each MPI process must only see its own dedicated GPU. For example, if you run 8 MPI processes on a DGX system with 8 GPUs, each MPI process should be assigned its own dedicated GPU via `CUDA_VISIBLE_DEVICES` when invoking `mpiexec` (or `mpirun`) commands.
-*   **`CUDAQ_TIMING_TAGS=tags`**: When the environment variable includes 9 in the tag set, timing for the path-finding stage (Prepare) and contraction stage (Compute or Sample) are output for the user.
-*   **`CUDAQ_TENSORNET_CONTROLLED_RANK=X`**: Specify the number of controlled qubits whereby the full tensor body of the controlled gate is expanded. If the number of controlled qubits is greater than this value, the gate is applied as a controlled tensor operator to the tensor network state. Default value is 1.
-*   **`CUDAQ_TENSORNET_OBSERVE_CONTRACT_PATH_REUSE=X`**: Set this environment variable to `TRUE` (`ON`) or `FALSE` (`OFF`) to enable or disable contraction path reuse when computing expectation values. Default is `OFF`.
-*   **`CUDAQ_TENSORNET_NUM_HYPER_SAMPLES=X`**: Specify the number of hyper samples used in the tensor network contraction path finder. Default value is 8 if not specified. Increasing this value will increase the path-finding time, but can decrease the contraction time if a better quality path is found (and vice versa). Hyper samples are processed in parallel using multiple host threads.
-*   **`CUDAQ_TENSORNET_FIND_THREADS=X`**: Used to control the number of threads on the host used for path-finding. The default value is half of the available CPU hardware threads. For processors with 1 hardware thread per CPU core (no `SMT`), increasing this to equal the number of CPU cores can improve performance.
-*   **`CUDAQ_TENSORNET_FIND_LIMIT=X`**: Set this environment variable to `TRUE` (`ON`) or `FALSE` (`OFF`) to enable or disable a heuristic to limit the path-finding time based on the predicted contraction time. When on, increasing the number of hyper samples may have no effect beyond a certain threshold due to enforcement of the time limit. Default is `ON`.
-*   **`CUDAQ_TENSORNET_FIND_DETERMINISTIC=X`**: Set this environment variable to `TRUE` (`ON`) or `FALSE` (`OFF`) to enable or disable deterministic path-finding as controlled by the CUDA-Q `set_random_seed()` function. When on, the number of path-finding threads is limited to 1 and therefore this setting can significantly decrease performance. Default is `OFF`.
-
-> **Note:** Setting the `CUDAQ_TENSORNET_*` environment variables will override any corresponding environment variables used by the `cuTensorNet` library.
-
-#### Matrix product state (`tensornet-mps`)
-
-The `tensornet-mps` backend is based on the matrix product state (MPS) representation of the state vector/wave function, exploiting the sparsity in the tensor network via tensor decomposition techniques such as QR and SVD. As such, this backend is an approximate simulator, whereby the number of singular values may be truncated to keep the MPS size tractable. The `tensornet-mps` backend only supports single-GPU simulation. Its approximate nature allows the `tensornet-mps` backend to handle a large number of qubits for certain classes of quantum circuits on a relatively small memory footprint.
-
-The `tensornet-mps` target supports both single and double floating point precision.
-
-To execute a program on the `tensornet-mps` target, use the following commands:
-
-```bash
-# Double Precision (Default):
-python3 program.py [...] --target tensornet-mps
-
-# Single Precision:
-python3 program.py [...] --target tensornet-mps --target-option fp32
-```
-
-The target can also be defined in the application code by calling
-
-```python
-cudaq.set_target('tensornet-mps')                  # default double-precision
-cudaq.set_target('tensornet-mps', option='fp32')   # single-precision
-```
-
-Specific aspects of the simulation can be configured by defining the following environment variables:
-
-*   **`CUDAQ_MPS_MAX_BOND=X`**: The maximum number of singular values to keep (fixed extent truncation). Default: 64.
-*   **`CUDAQ_MPS_ABS_CUTOFF=X`**: The cutoff for the largest singular value during truncation. Eigenvalues that are smaller will be trimmed out. Default: 1e-5.
-*   **`CUDAQ_MPS_RELATIVE_CUTOFF=X`**: The cutoff for the maximal singular value relative to the largest eigenvalue. Eigenvalues that are smaller than this fraction of the largest singular value will be trimmed out. Default: 1e-5.
-*   **`CUDAQ_MPS_SVD_ALGO=X`**: The SVD algorithm to use. Valid values are: `GESVD` (QR algorithm), `GESVDJ` (Jacobi method), `GESVDP` ([polar decomposition](https://epubs.siam.org/doi/10.1137/090774999)), `GESVDR` ([randomized methods](https://epubs.siam.org/doi/10.1137/090771806)). Default: `GESVDJ`.
-*   **`CUDAQ_MPS_GAUGE=X`**: The optional gauge option to improve accuracy of the MPS simulation. Valid values are: `FREE` (gauge is disabled) or `SIMPLE` (simple update algorithm). By default, no gauge configuration is set, thus the default `cuquantum` MPS setting will be used (see the [cuQuantum doc](https://docs.nvidia.com/cuda/cuquantum/latest/cutensornet/api/types.html#cutensornetstatempsgaugeoption-t)).
-
-> **Note:** The parallelism of Jacobi method (the default `CUDAQ_MPS_SVD_ALGO` setting) gives GPU better performance on small and medium size matrices. If you expect a large number of singular values (e.g., increasing the `CUDAQ_MPS_MAX_BOND` setting), please adjust the `CUDAQ_MPS_SVD_ALGO` setting accordingly.
-
-> **Note:** Both `tensornet-mps` and `tensornet` backends will allocate a scratch space on GPU device memory for their operations. For example, the scratch space can be used to store the contracted reduced density matrix to generate measurement bit strings.
->
-> By default, these backends reserve 50% of free memory for their scratch space. This ratio can be customized using the `CUDAQ_TENSORNET_SCRATCH_SIZE_PERCENTAGE` environment variable. Valid setting must be between 5% and 95%. Users may encounter runtime errors, e.g., insufficient workspace or CUDA memory allocation errors, when setting `CUDAQ_TENSORNET_SCRATCH_SIZE_PERCENTAGE` toward its limits.
-
-> **Note:** All floating-point data, e.g., gate matrices, noise channel Kraus operator matrices, contracted state vector, etc., are converted to the target's precision setting, if not already in that precision format. Hence, users would need to take into account potential precision loss when using the single precision setting.
-
----
-
-## Part 4: Amazon Braket Backend
-
-> Source: https://nvidia.github.io/cuda-quantum/latest/using/backends/cloud/braket.html
-
-[Amazon Braket](https://aws.amazon.com/braket/) is a fully managed AWS service which provides Jupyter notebook environments, high-performance quantum circuit simulators, and secure, on-demand access to various quantum computers. To get started, users must enable Amazon Braket in their AWS account by following [these instructions](https://docs.aws.amazon.com/braket/latest/developerguide/braket-enable-overview.html). See the [Amazon Braket Documentation](https://docs.aws.amazon.com/braket/) and [Examples](https://github.com/amazon-braket/amazon-braket-examples/tree/main/examples/nvidia_cuda_q); available devices and regions are listed [here](https://docs.aws.amazon.com/braket/latest/developerguide/braket-devices.html).
-
-CUDA-Q programs can run on Amazon Braket as a [Hybrid Job](https://docs.aws.amazon.com/braket/latest/developerguide/braket-what-is-hybrid-job.html) — see the [Hybrid Jobs getting-started guide](https://docs.aws.amazon.com/braket/latest/developerguide/braket-jobs-first.html) and the [CUDA-Q on Braket guide](https://docs.aws.amazon.com/braket/latest/developerguide/braket-using-cuda-q.html).
-
-### Setting Credentials
-
-After enabling Amazon Braket in AWS, set credentials using any of the documented [methods](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/credentials.html). The simplest is the [AWS CLI](https://aws.amazon.com/cli/):
-
-```bash
-aws configure
-```
-
-Alternatively, set the following environment variables:
-
-```bash
-export AWS_DEFAULT_REGION="<region>"
-export AWS_ACCESS_KEY_ID="<key_id>"
-export AWS_SECRET_ACCESS_KEY="<access_key>"
-export AWS_SESSION_TOKEN="<token>"
-```
-
-### Submitting
-
-Select the submission target with `cudaq.set_target()`:
-
-```python
-cudaq.set_target("braket")
-```
-
-By default, jobs are submitted to the state vector simulator, `SV1`.
-
-To specify which Amazon Braket device to use, set the `machine` parameter.
-
-```python
-device_arn = "arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet"
-cudaq.set_target("braket", machine=device_arn)
-```
-
-where `arn:aws:braket:eu-north-1::device/qpu/iqm/Garnet` refers to the IQM Garnet QPU.
-
-To emulate the device locally, without submitting through the cloud, you can also set the `emulate` flag to `True`.
-
-```python
-cudaq.set_target("braket", emulate=True)
-```
-
-Set the number of shots for a kernel execution via the `shots_count` argument to `cudaq.sample` (default: 1000).
-
-```python
-cudaq.sample(kernel, shots_count=100)
-```
-
-For a complete example, see the Amazon Braket section of [15. Using Quantum Hardware Providers](#15-using-quantum-hardware-providers) in Part 1.
 
 ---
 
