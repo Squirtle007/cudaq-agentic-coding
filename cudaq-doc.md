@@ -21,6 +21,7 @@
   - [14. Performance Optimizations](#14-performance-optimizations)
   - [15. Using Quantum Hardware Providers](#15-using-quantum-hardware-providers)
   - [16. When to Use sample vs. run](#16-when-to-use-sample-vs-run)
+  - [17. QAOA for Arbitrary QUBO Problems — Vanilla and XY-Mixer](#17-qaoa-for-arbitrary-qubo-problems--vanilla-and-xy-mixer)
 - **[Part 2: GPU Simulator Backends & Performance Options](#part-2-gpu-simulator-backends--performance-options)**
   - [State Vector Simulators](#state-vector-simulators)
   - [Tensor Network Simulators](#tensor-network-simulators)
@@ -3267,6 +3268,259 @@ print(f"Teleportation succeeded on all {len(runs)} shots")
 - Assigning measurement results to named variables in kernels passed to
   `sample` is deprecated and will be removed in a future release. Use `run`
   to retrieve individual measurement results.
+
+### 17. QAOA for Arbitrary QUBO Problems — Vanilla and XY-Mixer
+
+Reference for coding agents implementing QAOA on any QUBO with CUDA-Q. Covers the exact
+QUBO-to-Hamiltonian mapping, the vanilla ansatz, the constraint-preserving XY-mixer ansatz
+(for one-hot / cardinality constraints), complete kernel templates, and general practical
+rules.
+
+#### 1. QUBO → spin (Ising) Hamiltonian
+
+A QUBO over binary variables $x_i \in \{0, 1\}$:
+
+$$E(x) = \sum_i a_i x_i + \sum_{i<j} b_{ij} x_i x_j + c$$
+
+Substitute `x_i = (1 - Z_i) / 2` (computational basis: `Z|0> = +|0>`, `Z|1> = -|1>`,
+so `x=0 ↔ z=+1`, `x=1 ↔ z=-1`). Each QUBO term maps exactly:
+
+| QUBO term      | adds to offset | adds to `h_i` (coef of `Z_i`)   | adds to `J_ij` (coef of `Z_i Z_j`) |
+|----------------|----------------|----------------------------------|-------------------------------------|
+| `a_i * x_i`    | `+a_i / 2`     | `-a_i / 2`                       | —                                   |
+| `b_ij*x_i*x_j` | `+b_ij / 4`    | `-b_ij / 4` (to both `h_i, h_j`) | `+b_ij / 4`                         |
+
+Result: $H = \sum_i h_i Z_i + \sum_{i<j} J_{ij} Z_i Z_j + \mathrm{offset}$.
+
+```python
+def qubo_to_spin(coeffs, const):
+    """coeffs[(i, j)] with i <= j; the diagonal (i, i) holds linear terms (x^2 = x)."""
+    h, J, offset = {}, {}, const
+    for (i, j), w in coeffs.items():
+        if i == j:
+            offset += w / 2
+            h[i] = h.get(i, 0.0) - w / 2
+        else:
+            offset += w / 4
+            h[i] = h.get(i, 0.0) - w / 4
+            h[j] = h.get(j, 0.0) - w / 4
+            J[(i, j)] = J.get((i, j), 0.0) + w / 4
+    return h, J, offset
+```
+
+Rules that prevent whole classes of bugs:
+
+- **Always track the constant `offset`** and add it back to every expectation value
+  (`energy = <H> + offset`) so reported energies live on the original QUBO scale.
+- **Free sanity check:** the offset equals the average QUBO energy over all bitstrings,
+  which is exactly what the circuit's energy reads at all-zero angles. If
+  `energy(0, ..., 0) != offset`, the wiring is wrong.
+- **Penalty weights** (constraints encoded as penalties): a penalty's weight must strictly
+  exceed the largest energy gain that violating it can ever buy. Example pattern: a
+  one-hot penalty `A * (sum_c x_vc - 1)^2` competing against pairwise costs of weight `B`
+  on a degree-`Δ` interaction graph is safe when `A >= Δ*B + 1`.
+
+#### 2. Vanilla QAOA
+
+**Ansatz (p layers, 2p parameters):**
+
+1. Start in the uniform superposition: `h` on every qubit (the ground state of the
+   mixer `B = sum_i X_i`).
+2. Repeat p times: **cost layer** `exp(-i * gamma * H)`, then **mixer layer**
+   `exp(-i * beta * B)`.
+3. A classical optimizer tunes `(gammas, betas)` to minimize `<H>`; **sample only after
+   optimization** to read out candidate bitstrings.
+
+**Exact 1–2 qubit gate decompositions** (CUDA-Q convention `rz(t) = exp(-i t Z / 2)`):
+
+| Operator                          | Gates                                              |
+|-----------------------------------|----------------------------------------------------|
+| `exp(-i g h_i Z_i)`               | `rz(2*g*h_i)` on qubit i                           |
+| `exp(-i g J_ij Z_i Z_j)`          | `cx(i, j)` · `rz(2*g*J_ij)` on j · `cx(i, j)`      |
+| `exp(-i b X_i)` (mixer)           | `rx(2*b)` on qubit i                               |
+| constant `offset` term            | global phase — no gate                             |
+
+**Generic kernel** — the Hamiltonian enters as flat term lists, so one kernel serves any
+QUBO:
+
+```python
+import cudaq
+
+@cudaq.kernel
+def qaoa_vanilla(n: int,
+                 z_q: list[int],  z_c: list[float],                   # h_i terms
+                 zz_a: list[int], zz_b: list[int], zz_c: list[float], # J_ij terms
+                 gammas: list[float], betas: list[float]):
+    q = cudaq.qvector(n)
+    h(q)                                            # |+...+>
+    for layer in range(len(gammas)):
+        for i in range(len(z_q)):                   # cost: single-Z rotations
+            rz(2.0 * gammas[layer] * z_c[i], q[z_q[i]])
+        for i in range(len(zz_a)):                  # cost: ZZ rotations
+            x.ctrl(q[zz_a[i]], q[zz_b[i]])
+            rz(2.0 * gammas[layer] * zz_c[i], q[zz_b[i]])
+            x.ctrl(q[zz_a[i]], q[zz_b[i]])
+        for i in range(n):                          # mixer: X rotations
+            rx(2.0 * betas[layer], q[i])
+```
+
+**Host-side loop** (identical shape for both ansatz variants):
+
+```python
+from cudaq import spin
+
+H = None
+for i, c in zip(z_q, z_c):
+    term = c * spin.z(i)
+    H = term if H is None else H + term
+for a, b, c in zip(zz_a, zz_b, zz_c):
+    H = H + c * spin.z(a) * spin.z(b)
+
+def energy(params):                                  # p = 1: params = [gamma, beta]
+    return cudaq.observe(qaoa_vanilla, H, n, z_q, z_c, zz_a, zz_b, zz_c,
+                         [params[0]], [params[1]]).expectation() + offset
+
+optimizer = cudaq.optimizers.NelderMead()            # any derivative-free optimizer works
+optimizer.max_iterations = 50
+optimizer.initial_parameters = [0.1, 0.1]
+best_energy, theta = optimizer.optimize(dimensions=2, function=energy)
+
+result = cudaq.sample(qaoa_vanilla, n, z_q, z_c, zz_a, zz_b, zz_c,
+                      [theta[0]], [theta[1]], shots_count=2000)
+```
+
+**Scope and limits.** Vanilla QAOA explores all `2^n` bitstrings. That is appropriate for
+unconstrained or softly-constrained QUBOs. For **hard penalty-encoded constraints** the
+feasible set can be an exponentially small fraction of the search space; at shallow depth
+the optimized state still spreads over infeasible strings and sampling may *never* return
+a feasible solution. When the constraints have one-hot / cardinality structure, switch to
+the XY-mixer ansatz below instead of fighting with ever-larger penalties.
+
+#### 3. XY-Mixer QAOA (constraint-preserving / quantum alternating operator ansatz)
+
+**Use case:** the variables partition into groups of size `m`, and exactly one variable
+per group must equal 1 (one-hot). Typical encodings: assignment and coloring problems,
+one-slot-per-step scheduling, one-choice-per-category selection, position encodings of
+routing problems. The construction generalizes to "exactly k of m" constraints (see the
+notes at the end of this section).
+
+**Idea — build the constraint into the circuit instead of the objective:**
+
+1. **Initialize inside the feasible subspace.** Each group starts in a W state — the equal
+   superposition of its `m` one-hot patterns.
+2. **Mix without leaving the subspace.** XY interactions (`XX + YY`) swap the single
+   excitation between two qubits and conserve the number of 1s in the group. Every raw
+   sample then satisfies the one-hot constraints *by construction*.
+3. **Cost layer unchanged** — the same `H` built in Section 1. In-subspace, any one-hot
+   penalty terms reduce to constants: keeping them is harmless (and flags subspace leakage
+   under approximate simulation); dropping them yields a lighter circuit. Either choice is
+   valid — state which one you made.
+
+**W-state preparation** (m qubits, only 1–2 qubit gates). Place the excitation on the
+first qubit, then cascade it forward, leaving amplitude `1/m` behind at each step:
+
+- `x` on qubit 0, then for `k = 0 .. m-2`:
+  `ry.ctrl(theta[k], q[k], q[k+1])` followed by `x.ctrl(q[k+1], q[k])`
+- **Angles:** `theta[k] = 2 * arccos(1 / sqrt(m - k))`.
+  Example, `m = 4`: `[2*arccos(1/2), 2*arccos(1/sqrt(3)), 2*arccos(1/sqrt(2))]`
+  `≈ [2.0943951, 1.9106332, 1.5707963]`.
+- **Always validate once** on a small exact simulation: prepare one group and confirm each
+  one-hot basis state carries probability `1/m` (and nothing else appears).
+
+**XY mixer** on a pair `(a, b)`: `exp(-i * beta * (X_a X_b + Y_a Y_b) / 2)`. `XX` and `YY`
+commute on the same pair, so the exponential factorizes exactly into two ZZ-style blocks:
+
+- `XX` part: `h` on both → `cx(a,b)` · `rz(beta)` on b · `cx(a,b)` → `h` on both
+- `YY` part: `rx(+pi/2)` on both → `cx(a,b)` · `rz(beta)` on b · `cx(a,b)` → `rx(-pi/2)` on both
+
+Apply the mixer over a **ring** of each group's qubits (pairs `(k, (k+1) mod m)`); a
+complete graph over the group mixes faster per layer at the cost of more gates.
+
+**Generic kernel** (equal group size `m`; group `g` owns qubits `g*m .. g*m + m - 1`):
+
+```python
+@cudaq.kernel
+def qaoa_xy(n_groups: int, m: int,
+            z_q: list[int],  z_c: list[float],
+            zz_a: list[int], zz_b: list[int], zz_c: list[float],
+            w_angles: list[float],                   # the m-1 W-prep angles
+            gammas: list[float], betas: list[float]):
+    q = cudaq.qvector(n_groups * m)
+    for g in range(n_groups):                        # W state in every group
+        base = g * m
+        x(q[base])
+        for k in range(m - 1):
+            ry.ctrl(w_angles[k], q[base + k], q[base + k + 1])
+            x.ctrl(q[base + k + 1], q[base + k])
+    for layer in range(len(gammas)):
+        for i in range(len(z_q)):                    # cost layer — identical to vanilla
+            rz(2.0 * gammas[layer] * z_c[i], q[z_q[i]])
+        for i in range(len(zz_a)):
+            x.ctrl(q[zz_a[i]], q[zz_b[i]])
+            rz(2.0 * gammas[layer] * zz_c[i], q[zz_b[i]])
+            x.ctrl(q[zz_a[i]], q[zz_b[i]])
+        for g in range(n_groups):                    # XY ring mixer inside each group
+            base = g * m
+            for k in range(m):
+                a = base + k
+                b = base + (k + 1) % m               # arithmetic wrap — see Section 4
+                h(q[a]); h(q[b])                     # XX(beta/2)
+                x.ctrl(q[a], q[b]); rz(betas[layer], q[b]); x.ctrl(q[a], q[b])
+                h(q[a]); h(q[b])
+                rx(1.5707963, q[a]); rx(1.5707963, q[b])    # YY(beta/2)
+                x.ctrl(q[a], q[b]); rz(betas[layer], q[b]); x.ctrl(q[a], q[b])
+                rx(-1.5707963, q[a]); rx(-1.5707963, q[b])
+```
+
+The host-side loop is identical to vanilla (swap the kernel and add `w_angles`).
+
+**Why it pays:** with feasibility guaranteed structurally, the only thing left to optimize
+is the soft part of the objective. The feasible-sample rate typically jumps by many orders
+of magnitude relative to vanilla on the same problem, before any optimization at all.
+
+**Generalizations:**
+- *Exactly-k constraints:* initialize each group in the Dicke state of weight k (equal
+  superposition of all weight-k patterns); the same XY mixer conserves weight k.
+- *Ragged group sizes:* pass per-group offsets/sizes and per-group angle lists, or pad
+  groups to a common size with unused qubits pinned by large penalties.
+- *Validation shortcut:* run the kernel at cost-angle 0 and any nonzero mixer angle, then
+  sample — 100% of shots must satisfy the group constraint. This one test catches almost
+  every wiring mistake in the prep or the mixer.
+
+#### 4. General practical rules
+
+These are safeguards with each one earns its place — violating any of them has produced real, hard-to-spot failures in practice.
+
+**Correctness**
+1. **Verify the wiring with the free anchors.** `energy(all-zero angles)` must equal the
+   offset (the average energy over all bitstrings). For a constrained ansatz, sampling at
+   mixer-only angles must satisfy the constraint in 100% of shots.
+3. **Prefer arithmetic index computation over control flow inside kernels** — e.g. write a
+   ring wrap-around as `(k + 1) % m`, not as an `if` reassignment. Kernel compilers may
+   handle in-kernel branching differently than plain Python; arithmetic indexing is
+   portable and has been reliable where branching silently was not.
+4. **Keep angles strictly inside the optimizer's parameter domain.** Optimizers often have
+   default bounds (e.g. ±π) that are not prominently documented; a carried-forward value
+   sitting exactly on a boundary can be rejected or clamped. If a parameter lands on a
+   boundary such as π, nudge it just inside (the physics is unchanged).
+
+**Honest optimization and measurement**
+5. **Optimize on expectation values, sample once at the optimum, and count success only
+   from raw samples.** A classically repaired bitstring is not an algorithm result.
+6. **Fix random seeds** for reproducibility of everything the simulator makes
+   deterministic — and still expect timings and sampled counts to vary run to run.
+7. **Compare identical workloads** (same Hamiltonian, depth, parameters, precision) when
+   benchmarking; warm up before timing; report execution time and a speedup ratio.
+
+**Approximate simulation**
+8. **Validate any approximate/compressed backend against an exact reference** at fixed
+    parameters before trusting it, and afterwards **judge it by the solutions it samples,
+    not by its energy readout** — compressed representations can report distorted or even
+    unphysical energies (below the true minimum) while still sampling useful bitstrings.
+9. **Estimate memory by formula, not measurement**, when comparing methods: a state
+    vector needs `2^n * bytes_per_amplitude`; a matrix-product state needs roughly
+    `n * 2 * chi^2 * bytes_per_amplitude` for bond dimension `chi`. The memory argument is
+    exact and machine-independent; timing arguments are neither.
 
 ---
 
