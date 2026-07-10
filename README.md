@@ -1,5 +1,7 @@
 # Coloring a Map with QAOA — a CUDA-Q GPU-Optimization Tutorial
 
+This text is visible. <!-- This text is completely hidden on the rendered page -->
+
 In this hands-on series you build five Jupyter notebooks that solve one problem — coloring a map
 so that no two neighboring areas share a color — with the Quantum Approximate Optimization
 Algorithm (QAOA), scaling from a 16-qubit exact state-vector simulation to 36-qubit tensor
