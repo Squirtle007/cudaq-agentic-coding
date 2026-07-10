@@ -1,12 +1,12 @@
 # CUDA-Q Agentic Coding Bootcamp
 
-In this hands-on bootcamp you drive a coding agent that writes, runs, and verifies
-GPU-accelerated quantum programs with CUDA-Q. Every exercise uses the same working pattern:
-point the agent at the local reference docs, give it one self-contained prompt, let it build
-and execute the code, then check the result against a stated expected outcome. Three short
-warm-ups establish that rhythm; the main project then applies it, step by step, to a complete
-quantum optimization workflow — from a 16-qubit exact simulation to 36-qubit tensor networks,
-all on a single NVIDIA GPU.
+**Join us at the crossing point of agentic AI and quantum computing.** In this hands-on
+bootcamp you drive a coding agent that writes, runs, and verifies GPU-accelerated quantum
+programs with CUDA-Q: point it at the local references, give it one self-contained prompt,
+and check the verified result. Three short warm-ups set the rhythm — then the main project
+scales it into a complete quantum optimization workflow, from a 16-qubit exact simulation
+to 36-qubit tensor networks, all on a single NVIDIA GPU. You steer, the agent codes, and
+every step ends with a result you can trust.
 
 ## What's provided
 
