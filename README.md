@@ -3,17 +3,6 @@
 In this hands-on bootcamp you drive a coding agent that writes, runs, and verifies
 GPU-accelerated quantum programs with CUDA-Q!🚀
 
-## What's provided
-
-| File | What it is |
-|---|---|
-| `cudaq-doc.md` | a local CUDA-Q reference — kernels, backends, optimizers, performance switches; point your coding agent at it with `@cudaq-doc.md` |
-| `tutorial-guide.md` | the build conventions every agent-built notebook follows — cell numbering, helpers reuse, reproducibility, budgets, execution discipline; point your coding agent at it with `@tutorial-guide.md` |
-| `cudaq_basics.ipynb` | a hands-on CUDA-Q fundamentals notebook — states, gates, entanglement, noise, a small variational loop; you run this one yourself (Warm-up 0) |
-| `00_notebook.ipynb` | the prebuilt QAOA baseline notebook (COBYLA) — **read and run it before Step 1**; every later notebook is based on it |
-| `helpers.py` | shared beginner-friendly functions: map loading/drawing, QUBO building, spin conversion, decoding/validation, timing |
-| `data/taiwan_map_xy.json` | a simplified schematic of Taiwan's 19 main-island counties (polygons, centroids, region and zone tags, adjacency lists) |
-
 ## Setup
 
 ```
@@ -25,19 +14,17 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 
 ## How the bootcamp works
 
-1. **Warm-up 0:** run `cudaq_basics.ipynb` yourself, top to bottom, to meet CUDA-Q hands-on.
-2. **Warm-ups 1–2:** meet your coding agent — have it read the two reference docs, then have it
-   build and run its first GPU program. Copy each prompt below into the agent as-is.
+1. **Warm-up 0:** run `cudaq_basics.ipynb` yourself, top to bottom, to learn CUDA-Q hands-on.
+2. **Warm-ups 1–2:** meet your coding agent — have it read the two references to streamline your learning experience.
 3. **Main project:** open and run `00_notebook.ipynb`, the QAOA baseline every later notebook
-   improves on. Then, for each of Steps 1–4, copy the prompt into your coding agent, let it
-   build and execute the notebook, check the expected outcome, and move on. Each prompt is
-   self-contained.
+   improves on. Then, for each of Steps 1–4, copy or customize the prompt into your coding agent, let it
+   build and execute the notebooks.
 
 ---
 
 ## Warm-up 0 — Meet CUDA-Q, no agent yet
 
-**Goal:** get a feel for what the agent will be writing for you. Open `cudaq_basics.ipynb` and run it top to bottom: it serves as the CUDA-Q fundamental, walking from single-qubit states and gates through entanglement and noise to a small variational optimization.
+**Goal:** get a feel for what the agent will be writing for you. Open `cudaq_basics.ipynb` and run it top to bottom: it serves as the CUDA-Q fundamental, walking from single-qubit states and gates through entanglement and noise to a variational optimization.
 
 ---
 
@@ -45,25 +32,23 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 
 **Goal:** the two markdown files in this folder are the agent's textbook (`cudaq-doc.md`) and
 rulebook (`tutorial-guide.md`) for everything that follows. Before asking for any code, have the
-agent read both and tell you what it found — you confirm it starts from the right knowledge, and
-it keeps that knowledge in context.
-
+agent read both and tell you what it found:
 ```text
-Read @cudaq-doc.md and @tutorial-guide.md, then give me a short plain-language summary of what
-each one covers. No code or files yet — just the wrap-up.
+Read @cudaq-doc.md and @tutorial-guide.md, then give me a short summary of what
+each one covers. Just the wrap-up. No code or files yet.
 ```
 
 ---
 
 ## Warm-up 2 — First GPU program: a 20-qubit GHZ state
 
-**Goal:** run the full agentic loop once — prompt in, working GPU program out — on the
-"hello, world" of entanglement. A GHZ state puts all qubits into a single superposition of
+**Goal:** run the agentic flow — prompt in, working GPU program out — on the
+"hello, world" of entanglement.  A GHZ state puts all qubits into a single superposition of
 all-zeros and all-ones, so every measurement comes back as one of exactly those two strings.
 
-Example prompt -- just copy it to your terminal:
+Just copy the example prompt to your terminal:
 ```text
-Write a simple script ghz.py that uses CUDA-Q to prepare a 20-qubit GHZ state on the GPU
+Write a simple script ghz.py using CUDA-Q to prepare a 20-qubit GHZ state on the GPU
 ("nvidia" target), sample 1000 shots, and print the counts. Refer to @cudaq-doc.md if needed,
 then run it and show me the output.
 ```
@@ -73,23 +58,27 @@ zeros and all ones, about half each.
 
 ---
 
-## Agentic coding with CUDA-Q — Advancing QAOA simulation
+## 🖥️ Agentic coding with CUDA-Q — Advancing QAOA simulation 
 
-This is the core session of the bootcamp: a self-contained, natural-language prompt goes in, and a working, verified program comes out—powering a full quantum-application build. You will co-work with agents: they read the prompt, write and execute each notebook, and check every result before you move on.
+This is the core session of the bootcamp: a self-contained, natural-language prompt goes in, and a working, verified program comes out—powering a full quantum-application build.: they read the prompt, write and execute each notebook, and check every result before you move on.
 
-Across five Jupyter notebooks, you will solve a single problem—coloring a Taiwan map so that no two neighboring areas share a color—using the Quantum Approximate Optimization Algorithm (QAOA). Along the way, you scale from a 16-qubit exact state-vector simulation to 36-qubit tensor-network simulations with CUDA-Q’s built-in optimization techniques, all on a single NVIDIA GPU.
+You will co-work with agents, solve a single problem—coloring a Taiwan map so that no two neighboring areas share a color—using the Quantum Approximate Optimization Algorithm (QAOA). Along the way, you scale from a 16-qubit exact state-vector simulation to 36-qubit tensor-network simulations with CUDA-Q’s built-in optimization techniques, advancing the quantum simulation at scale.
 
 | Notebook | Optimizer | Backend | The improvement it teaches |
 |---|---|---|---|
-| 00 (provided) | COBYLA | `qpp-cpu` vs `nvidia` `fp32` | the baseline: full QAOA workflow, CPU-vs-GPU timing |
+| 00 (provided) | COBYLA | `qpp-cpu` vs `nvidia` `fp32` | the pre-built baseline: full QAOA workflow, CPU-vs-GPU timing |
 | 01 (you build) | Nelder–Mead | `nvidia` `fp32` | optimizer swap + gate-fusion settings + per-iteration GPU timing |
 | 02 (you build) | Nelder–Mead | `tensornet` `fp32` | scaling to 36 qubits using tensor-network method |
 | 03 (you build) | Nelder–Mead | `tensornet` `fp32` | contraction-path reuse: speedup with a simple setup |
 | 04 (you build) | Nelder–Mead | `tensornet-mps` `fp32` | a fast approximate solver (χ=16), trading accuracy for speed |
 
-Notebook 00 is pre-built as a baseline: the full QAOA workflow — turn
-the map into a math problem (QUBO → spin Hamiltonian), build the circuit, optimize, sample,
-verify, and draw the answer back on the map. Each subsequent notebook retains this skeleton and adds incremental optimizations, leveraging CUDA-Q’s built-in features to advance the quantum simulation.
+Other ingredients:
+| File | What it is |
+|---|---|
+| `cudaq-doc.md` | agent-ready CUDA-Q reference for quantum programming - point your agent at it with `@cudaq-doc.md` |
+| `tutorial-guide.md` | conventions that every agent-built notebook follows to ensure reproducibility |
+| `helpers.py` | shared useful functions: map visualization, QUBO building, decoding/validation, etc |
+| `data/taiwan_map_xy.json` | simplified schematic of Taiwan's 19 main-island counties |
 
 ---
 
@@ -120,7 +109,7 @@ Structure (5 code cells):
 5. Draw coloring (region level, unit_labels on). Compare best energy and valid rate vs 00.
 ```
 
-**Expected outcome:** `01_notebook.ipynb` runs end to end: the new optimizer clearly beats
+**Expected outcome:** `01_notebook.ipynb` with the new optimizer clearly beats
 notebook 00 on the same budget, and the map comes out validly colored.
 
 ---
@@ -129,13 +118,14 @@ notebook 00 on the same budget, and the map comes out validly colored.
 
 **Goal:** scale from 16 to 36 qubits — hit a memory wall: a 36-qubit state vector
 needs 2^36 × 8 bytes ≈ 550 GB, more than most single GPUs, so we switch to the
-tensor-network method. With the CUDA-Q `tensornet` backend, we can push further by expanding 
-the coloring problem from four regions to nine zones on the map, bringing it closer to a real-world scenario.
+tensor-network method. With the CUDA-Q `tensornet` backend, we can push the coloring problem 
+from 4 regions to 9 zones on the map, bringing it closer to a real-world scenario.
 
-Here, we build QAOA with an [XY mixer](https://arxiv.org/abs/1904.09314) to improve optimization. The mixer is the trick: plain rx mixing wanders over all 2^36 bitstrings, and almost none of them are
+Here, we build QAOA with an [XY mixer](https://arxiv.org/abs/1904.09314) to improve optimization. 
+The mixer is the trick: plain rx mixing wanders over all 2^36 bitstrings, and almost none of them are
 valid colorings. The XY circuit instead starts each zone in a W state — its single excitation
 shared equally across the zone's four color qubits — and mixes by swapping that excitation
-around the zone, never changing the counts of 1.
+around the zone, never changing the counts of 1:
 ```text
 Build and execute 02_notebook.ipynb here from notebooks 00/01 (read them; keep Nelder-Mead).
 
@@ -159,20 +149,20 @@ Structure (<=6 code cells, exactly ONE assert):
 4. SHOTS=2000; sample best angles ONLY after optimization; helpers.summarize_samples; THE
    assert: helpers.is_valid(best).
 5. Map: counties by zone PALETTE color, zone graph (helpers.group_positions(taiwan,"zone")),
-   color legend; per-eval + per-shot seconds; theta* (6 decimals).
+   color legend; per-eval + per-shot seconds; theta*.
 ```
 
-**Expected outcome:** `02_notebook.ipynb` runs end to end at 36 qubits: valid colorings show
-up in the sample, and the final map shows all 19 counties colored by zone.
+**Expected outcome:** `02_notebook.ipynb` Successfully completed a 36-qubit simulation and obtained 
+valid colorings through sampling, with the map showing all 19 counties colored by zone.
 
 ---
 
 ## Step 3 — Reuse contraction paths: several-times-cheaper evaluations
 
 **Goal:** stop paying for planning twice. A tensor-network evaluation has two parts — first
-*plan* the contraction path (like choosing the order of a chain of matrix multiplications),
+*plan* the contraction path (the order of a chain of matrix multiplications),
 then *contract* — and since the QAOA loop never changes the circuit's shape, only the angle
-values, replanning on every evaluation is pure waste. Two variables enable that:
+values, replanning on every evaluation is pure waste. So we can optimize:
 `CUDAQ_TENSORNET_OBSERVE_CONTRACT_PATH_REUSE` caches the contraction path, and
 `CUDAQ_TENSORNET_NUM_HYPER_SAMPLES` lets the planner search for a better path.
 
@@ -192,14 +182,11 @@ Structure (<=6 code cells, exactly ONE assert):
 4. SHOTS=2000; sample best angles (post-optimization); summarize_samples; THE assert:
    helpers.is_valid(best).
 5. Map (as 02) + table: seconds/evaluation and optimize seconds (02 vs this); speedup+verdict;
-   theta* (6 decimals) AND exact energy (04 needs them).
-
-Executing takes ~5 min. Run nbconvert as ONE foreground Bash call with explicit
-timeout=600000 ms (NEVER the 120 s default — it backgrounds and dies); after it exits,
-confirm every cell has outputs and zero errors BEFORE reporting executed=true.
+   theta* AND exact energy (04 needs them).
 ```
 
-**Expected outcome:** `03_notebook.ipynb` runs the same optimization with contraction path reuse and finishes noticeably faster, and the map is again validly colored.
+**Expected outcome:** `03_notebook.ipynb` runs the same optimization with contraction path reuse and 
+finishes noticeably faster, and the map is again validly colored.
 
 ---
 
