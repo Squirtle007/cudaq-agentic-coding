@@ -8,7 +8,7 @@ Apply the rules below everywhere unless a prompt overrides one:
 ## Workflow
 - Build the notebook named in the step prompt, in this folder, matching the beginner-friendly
   style of the provided baseline notebook.
-- Structure every notebook as numbered code cells — **at most 6**, with **exactly one `assert`**
+- Structure every notebook as numbered code cells — **at most 6 (important)**, with **exactly one `assert` (if needed)**
   in the whole notebook (see Correctness & sampling). Use the exact cell count when a prompt
   gives one. Precede each code cell with a short markdown cell (beginner tone) that explains
   the idea before the code shows it.
@@ -36,7 +36,7 @@ Apply the rules below everywhere unless a prompt overrides one:
   at import time. State in markdown that changing them needs a kernel restart.
 
 ## Reproducibility
-- Always set `cudaq.set_random_seed(1234)` — the shared seed that aligns every notebook in the
+- Important: always set `cudaq.set_random_seed(1234)` — the shared seed that aligns every notebook in the
   series — unless a prompt names a different one.
 - Any number carried from another notebook must be hardcoded with a **provenance comment**; if your
   own run differs, use your own value.
