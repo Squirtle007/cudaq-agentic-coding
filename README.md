@@ -39,7 +39,7 @@ each one covers. Just the wrap-up. No code or files yet.
 
 ---
 
-## Warm-up 2 — First GPU program: a 20-qubit GHZ state
+## Warm-up 2 — simple GHZ state
 
 **Goal:** run the agentic flow — prompt in, working GPU program out — on the
 "hello, world" of entanglement.  A GHZ state puts all qubits into a single superposition of
@@ -69,7 +69,7 @@ You will co-work with agents, solve a single problem—coloring a Taiwan map so 
 | 01 (you build) | Nelder–Mead | `nvidia` `fp32` | optimizer swap + gate-fusion settings + per-iteration GPU timing |
 | 02 (you build) | Nelder–Mead | `tensornet` `fp32` | scaling to 36 qubits using tensor-network method |
 | 03 (you build) | Nelder–Mead | `tensornet` `fp32` | contraction-path reuse: speedup with a simple setup |
-| 04 (you build) | Nelder–Mead | `tensornet-mps` `fp32` | a fast approximate solver (χ=16), trading accuracy for speed |
+| 04 (you build) | Nelder–Mead | `tensornet-mps` `fp32` | matrix product state approximation, trading accuracy for speed |
 
 Other ingredients:
 | File | What it is |
@@ -81,7 +81,7 @@ Other ingredients:
 
 ---
 
-## Step 1 — Swap the optimizer, set the GPU switches, compare against the baseline
+## Step 1 — Swap the optimizer, tune the GPU, compare against the baseline
 
 **Goal:** make the cheapest big improvement first: on the same 50-evaluation budget, swapping
 the classical optimizer from COBYLA to Nelder–Mead drops the energy far lower and increases the
@@ -113,7 +113,7 @@ notebook 00 on the same budget, and the map comes out validly colored.
 
 ---
 
-## Step 2 — Scale to 36 qubits with tensor networks and an XY-mixer circuit
+## Step 2 — Scale to 36 qubits with tensor networks
 
 **Goal:** scale from 16 to 36 qubits — hit a memory wall: a 36-qubit state vector
 needs 2^36 × 8 bytes ≈ 550 GB, more than most single GPUs, so we switch to the
@@ -156,7 +156,7 @@ valid colorings through sampling, with the map showing all 19 counties colored b
 
 ---
 
-## Step 3 — Reuse contraction paths: several-times-cheaper evaluations
+## Step 3 — Reuse and optimize contraction paths
 
 **Goal:** stop paying for planning twice. A tensor-network evaluation has two parts — first
 *plan* the contraction path (the order of a chain of matrix multiplications),
