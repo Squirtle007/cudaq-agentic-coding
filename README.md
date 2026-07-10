@@ -61,7 +61,9 @@ zeros and all ones, about half each.
 
 This is the core session of the bootcamp: a self-contained, natural-language prompt goes in, and a working, verified program comes out—powering a full quantum-application build.: they read the prompt, write and execute each notebook, and check every result before you move on.
 
-You will co-work with agents, solve a single problem—coloring a Taiwan map so that no two neighboring areas share a color—using the Quantum Approximate Optimization Algorithm (QAOA). Along the way, you scale from a 16-qubit exact state-vector simulation to 36-qubit tensor-network simulations with CUDA-Q’s built-in optimization techniques, advancing the quantum simulation at scale.
+> You will co-work with agents, solve a single problem—coloring a Taiwan map so that no two neighboring areas share a color—using the Quantum Approximate Optimization Algorithm (QAOA). Along the way, you scale from a 16-qubit exact state-vector simulation to 36-qubit tensor-network simulations with CUDA-Q’s built-in optimization techniques, advancing the quantum simulation at scale:
+
+![](data/learning_path.png)
 
 | Notebook | Optimizer | Backend | The improvement it teaches |
 |---|---|---|---|
