@@ -16,9 +16,8 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 
 1. **Warm-up 0:** run `cudaq_basics.ipynb` yourself, top to bottom, to learn CUDA-Q hands-on.
 2. **Warm-ups 1–2:** meet your coding agent — have it read the two references to streamline your learning experience.
-3. **Main project:** open and run `00_notebook.ipynb`, the QAOA baseline every later notebook
-   improves on. Then, for each of Steps 1–4, copy or customize the prompt into your coding agent, let it
-   build and execute the notebooks.
+3. **Agentic coding with CUDA-Q:** start from the QAOA baseline in `00_notebook.ipynb`. Then, for Steps 1-4, copy or
+   customize each prompt into your coding agent and let it iteratively build, optimize, and scale the CUDA-Q program.
 
 ---
 
