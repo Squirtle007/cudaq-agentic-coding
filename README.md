@@ -91,7 +91,7 @@ Example prompt:
 ```text
 Build and execute `01_notebook.ipynb` here, applying tutorial-guide.md conventions, from
 `00_notebook.ipynb` (read it): reuse its 16-qubit region problem and p=1 kernel exactly
-(A=4.0/B=1.0, only 1-/2-qubit gates), cudaq.set_target("nvidia", option="fp32").
+(A=4.0/B=1.0, only 1-/2-qubit gates), target "nvidia" single-GPU backend, and FP32 precision.
 
 Structure:
 1. FIRST, BEFORE `import cudaq`:
@@ -103,8 +103,8 @@ Structure:
    timed. Each energy() call prints its GPU milliseconds alongside the energy; print best
    energy, total time. Nelder-Mead lands far below 00's COBYLA on the same 50-evaluation
    budget.
-4. Sample 20,000 shots after optimization; summarize_samples; the single is_valid assert.
-   Valid rate far above 00's.
+4. Sample 20,000 shots after optimization; summarize_samples; perform a single assert helpers.is_valid(best) check.
+   Report a valid rate well above 00’s.
 5. Draw coloring (region level, unit_labels on). Compare best energy and valid rate vs 00.
 ```
 
@@ -128,8 +128,8 @@ around the zone, never changing the counts of 1:
 ```text
 Build and execute 02_notebook.ipynb here from notebooks 00/01 (read them; keep Nelder-Mead).
 
-Problem: 9 zones (helpers.ZONE_ORDER, load_map()["zone_edges"]), 4 colors -> 36 qubits,
-A=8.0/B=1.0. cudaq.set_target("tensornet", option="fp32").
+Problem: 9 zones * 4 colors -> 36 qubits, using the zones listed in helpers.ZONE_ORDER and the adjacency specified in load_map()["zone_edges"]
+A=8.0/B=1.0. Target "tensornet" (tensor-network) backend, and FP32 precision.
 Markdown: why tensornet — 36 qubits = 2^36x8 = 550 GB, beyond most single GPU.
 
 Structure:
@@ -145,7 +145,7 @@ Structure:
 3. Optimize: Nelder-Mead, max_iterations=5, start [0.1,0.1], timed; print best energy,
    angles, seconds/evaluation (total/5). No energy calls outside these 5.
 4. SHOTS=2000; sample best angles ONLY after optimization; helpers.summarize_samples; THE
-   assert: helpers.is_valid(best).
+   assert: helpers.is_valid(best) to verify the bitstring is a valid map coloring.
 5. Map: counties by zone PALETTE color, zone graph (helpers.group_positions(taiwan,"zone")),
    color legend; per-eval + per-shot seconds; theta*.
 ```
@@ -178,7 +178,7 @@ Structure:
    SAME size: start [0.1,0.1], max_iterations=5; print best energy, angles,
    elapsed vs 02's total (hardcoded, provenance) — print speedup.
 4. SHOTS=2000; sample best angles (post-optimization); summarize_samples; THE assert:
-   helpers.is_valid(best).
+   helpers.is_valid(best), verifying that the sampled bitstring is a valid map coloring.
 5. Map (as 02) + table: seconds/evaluation and optimize seconds (02 vs this); speedup+verdict;
    theta* AND exact energy (04 needs them).
 ```
@@ -207,7 +207,7 @@ Structure:
 3. Nelder-Mead from [0.1,0.1] FRESH (never 03's final angles).
    max_iterations=5; timed; print seconds/evaluation and best readout.
 4. SHOTS=2000; sample ONCE at optimized angles (post-optimization), timed;
-   summarize_samples; THE assert: helpers.is_valid(best).
+   summarize_samples; THE assert: helpers.is_valid(best), to verify that the sampled bitstring is valid.
 5. Map (counties by zone) + timing table, ONLY time rows: seconds/evaluation (03's vs
    chi=16's), ratio; verdict: sampled quality matches the exact backend at
    at-or-below cost, memory far smaller, readout untrustworthy — answers verified exactly
