@@ -1,0 +1,6 @@
+# cudaq itself is preinstalled (source build) — not listed here
+numpy
+scipy
+matplotlib
+networkx
+jupyter
