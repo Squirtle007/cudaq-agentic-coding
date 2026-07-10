@@ -128,7 +128,7 @@ around the zone, never changing the counts of 1:
 ```text
 Build and execute 02_notebook.ipynb here from notebooks 00/01 (read them; keep Nelder-Mead).
 
-Problem: 9 zones * 4 colors -> 36 qubits, using the zones listed in helpers.ZONE_ORDER and the adjacency specified in load_map()["zone_edges"]
+Problem: 9 zones * 4 colors -> 36 qubits, using the zones listed in helpers.ZONE_ORDER and the adjacency specified in load_map()["zone_edges"].
 A=8.0/B=1.0. Target "tensornet" (tensor-network) backend, and FP32 precision.
 Markdown: why tensornet — 36 qubits = 2^36x8 = 550 GB, beyond most single GPU.
 
@@ -207,7 +207,7 @@ Structure:
 3. Nelder-Mead from [0.1,0.1] FRESH (never 03's final angles).
    max_iterations=5; timed; print seconds/evaluation and best readout.
 4. SHOTS=2000; sample ONCE at optimized angles (post-optimization), timed;
-   summarize_samples; THE assert: helpers.is_valid(best), to verify that the sampled bitstring is valid.
+   summarize_samples; THE assert: helpers.is_valid(best) to verify validity..
 5. Map (counties by zone) + timing table, ONLY time rows: seconds/evaluation (03's vs
    chi=16's), ratio; verdict: sampled quality matches the exact backend at
    at-or-below cost, memory far smaller, readout untrustworthy — answers verified exactly
