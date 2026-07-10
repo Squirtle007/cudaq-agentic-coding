@@ -27,7 +27,7 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 
 ---
 
-## Warm-up 1 — Have the agent read the references
+## Warm-up 1 — Equip the agent with CUDA-Q knowledge
 
 **Goal:** the two markdown files in this folder are the agent's textbook (`cudaq-doc.md`) and
 rulebook (`tutorial-guide.md`) for everything that follows. Before asking for any code, have the
@@ -39,7 +39,7 @@ each one covers. Just the wrap-up. No code or files yet.
 
 ---
 
-## Warm-up 2 — simple GHZ state
+## Warm-up 2 — Simple GHZ state
 
 **Goal:** run the agentic flow — prompt in, working GPU program out — on the
 "hello, world" of entanglement.  A GHZ state puts all qubits into a single superposition of
