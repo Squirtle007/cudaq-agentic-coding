@@ -91,9 +91,9 @@ Example prompt:
 ```text
 Build and execute `01_notebook.ipynb` here, applying tutorial-guide.md conventions, from
 `00_notebook.ipynb` (read it): reuse its 16-qubit region problem and p=1 kernel exactly
-(A=4.0/B=1.0, only 1-/2-qubit gates), seed 1234, cudaq.set_target("nvidia", option="fp32").
+(A=4.0/B=1.0, only 1-/2-qubit gates), cudaq.set_target("nvidia", option="fp32").
 
-Structure (5 code cells):
+Structure:
 1. FIRST, BEFORE `import cudaq`:
    os.environ["CUDAQ_FUSION_MAX_QUBITS"] = "3"
    os.environ["CUDAQ_FUSION_NUM_HOST_THREADS"] = "4"
@@ -129,11 +129,10 @@ around the zone, never changing the counts of 1:
 Build and execute 02_notebook.ipynb here from notebooks 00/01 (read them; keep Nelder-Mead).
 
 Problem: 9 zones (helpers.ZONE_ORDER, load_map()["zone_edges"]), 4 colors -> 36 qubits,
-A=8.0/B=1.0. cudaq.set_target("tensornet", option="fp32"), deliberately NO env vars;
-cudaq.set_random_seed(1234). Markdown: why tensornet — 36 qubits = 2^36x8 = 550 GB, beyond
-most single GPU.
+A=8.0/B=1.0. cudaq.set_target("tensornet", option="fp32").
+Markdown: why tensornet — 36 qubits = 2^36x8 = 550 GB, beyond most single GPU.
 
-Structure (<=6 code cells, exactly ONE assert):
+Structure:
 1. QUBO via helpers; print term counts.
 2. ONE kernel, xy_kernel (not plain rx), 1-/2-qubit gates only:
    - W-state per zone: x(q[base]); for k in 0..2:
@@ -167,9 +166,9 @@ values, replanning on every evaluation is pure waste. So we can optimize:
 
 ```text
 Build and execute 03_notebook.ipynb here from 02_notebook.ipynb (read it; reuse
-problem/xy_kernel exactly — A=8.0/B=1.0, Nelder-Mead, seed 1234, tensornet fp32).
+problem/xy_kernel exactly — A=8.0/B=1.0, Nelder-Mead, tensornet fp32).
 
-Structure (<=6 code cells, exactly ONE assert):
+Structure:
 1. FIRST cell, BEFORE `import cudaq`:
    os.environ["CUDAQ_TENSORNET_OBSERVE_CONTRACT_PATH_REUSE"] = "TRUE"
    os.environ["CUDAQ_TENSORNET_NUM_HYPER_SAMPLES"] = "32"
@@ -195,9 +194,9 @@ finishes noticeably faster, and the map is again validly colored.
 
 ```text
 Build and execute 04_notebook.ipynb here from 03_notebook.ipynb (read it; same problem and
-xy_kernel, A=8.0/B=1.0, Nelder-Mead, seed 1234).
+xy_kernel, A=8.0/B=1.0, Nelder-Mead).
 
-Structure (5 code cells, exactly ONE assert):
+Structure:
 1. FIRST cell, BEFORE `import cudaq`:
    os.environ["CUDAQ_MPS_MAX_BOND"]="16"      (default 64)
    os.environ["CUDAQ_MPS_ABS_CUTOFF"]="1e-4"  (default 1e-5)

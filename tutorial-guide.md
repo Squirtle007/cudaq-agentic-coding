@@ -8,8 +8,10 @@ Apply the rules below everywhere unless a prompt overrides one:
 ## Workflow
 - Build the notebook named in the step prompt, in this folder, matching the beginner-friendly
   style of the provided baseline notebook.
-- Use the **exact cell count** the prompt gives. Precede each code cell with a short markdown cell
-  (beginner tone) that explains the idea before the code shows it.
+- Structure every notebook as numbered code cells — **at most 6**, with **exactly one `assert`**
+  in the whole notebook (see Correctness & sampling). Use the exact cell count when a prompt
+  gives one. Precede each code cell with a short markdown cell (beginner tone) that explains
+  the idea before the code shows it.
 - Execute in place, top to bottom, and confirm **zero errors** before considering it done:
   `jupyter nbconvert --to notebook --execute --inplace <notebook>.ipynb`
 
@@ -34,7 +36,8 @@ Apply the rules below everywhere unless a prompt overrides one:
   at import time. State in markdown that changing them needs a kernel restart.
 
 ## Reproducibility
-- Set the seed the prompt gives (e.g. `cudaq.set_random_seed(1234)`).
+- Always set `cudaq.set_random_seed(1234)` — the shared seed that aligns every notebook in the
+  series — unless a prompt names a different one.
 - Any number carried from another notebook must be hardcoded with a **provenance comment**; if your
   own run differs, use your own value.
 - Carry values at **full precision** — printed numbers are rounded, and a rounded value fed back
@@ -60,9 +63,8 @@ Apply the rules below everywhere unless a prompt overrides one:
 ## Execution discipline
 - Execute with ONE foreground `jupyter nbconvert --to notebook --execute --inplace
   --ExecutePreprocessor.timeout=550 <notebook>.ipynb`, setting the Bash tool call's timeout to
-  600000 ms — the 120 s default auto-backgrounds the call, which dies with your session and
-  reads as a failed build. Never run it in the background or concurrently; some notebooks take
-  ~10 minutes, so wait for completion.
+  600000 ms — Never the 120s default and never run in the background or concurrently; some notebooks
+  take ~10 minutes, so wait for completion.
 - Before executing, `compile()` every code cell's source to catch syntax errors cheaply.
 - If a cell errors, fix the notebook and rerun the same way until clean; confirm every code
   cell has outputs and zero errors before considering the build done.
