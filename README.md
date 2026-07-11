@@ -20,7 +20,6 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
    customize each prompt into your coding agent and let it iteratively build, optimize, and scale the CUDA-Q program.
 
 <br>
-<br>
 
 ---
 
@@ -28,7 +27,6 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 
 **Goal:** get a feel for what the agent will be writing for you. Open `cudaq_basics.ipynb` and run it top to bottom: it serves as the CUDA-Q fundamental, walking from single-qubit states and gates through entanglement and noise to a variational optimization.
 
-<br>
 <br>
 
 ---
@@ -43,7 +41,6 @@ Read @cudaq-doc.md and @tutorial-guide.md, then give me a short summary of what
 each one covers. Just the wrap-up. No code or files yet.
 ```
 
-<br>
 <br>
 
 ---
@@ -64,7 +61,6 @@ then run it and show me the output.
 **Expected outcome:** `ghz.py` runs on the GPU and the counts show only two results — all
 zeros and all ones, about half each.
 
-<br>
 <br>
 
 ---
@@ -95,7 +91,6 @@ Other ingredients:
 | `helpers.py` | shared useful functions: map visualization, QUBO building, decoding/validation, etc |
 | `data/taiwan_map_xy.json` | simplified schematic of Taiwan's 19 main-island counties |
 
-<br>
 <br>
 
 ---
@@ -130,7 +125,6 @@ Structure:
 **Expected outcome:** `01_notebook.ipynb` with the new optimizer clearly beats
 notebook 00 on the same budget, and the map comes out validly colored.
 
-<br>
 <br>
 
 ---
@@ -176,7 +170,6 @@ Structure:
 valid colorings through sampling, with the map showing all 19 counties colored by zone.
 
 <br>
-<br>
 
 ---
 
@@ -212,7 +205,6 @@ Structure:
 finishes noticeably faster, and the map is again validly colored.
 
 <br>
-<br>
 
 ---
 
@@ -245,7 +237,6 @@ Structure:
 **Expected outcome:** `04_notebook.ipynb` with the `tensornet-mps` backend still delivers a
 validly colored map at a similar speed while using a tiny fraction of the memory.
 
-<br>
 <br>
 
 ---
