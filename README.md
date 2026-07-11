@@ -19,11 +19,17 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 3. **Agentic coding with CUDA-Q:** start from the QAOA baseline in `00_notebook.ipynb`. Then, for Steps 1-4, copy or
    customize each prompt into your coding agent and let it iteratively build, optimize, and scale the CUDA-Q program.
 
+<br>
+<br>
+
 ---
 
 ## Warm-up 0 — Meet CUDA-Q, no agent yet
 
 **Goal:** get a feel for what the agent will be writing for you. Open `cudaq_basics.ipynb` and run it top to bottom: it serves as the CUDA-Q fundamental, walking from single-qubit states and gates through entanglement and noise to a variational optimization.
+
+<br>
+<br>
 
 ---
 
@@ -36,6 +42,9 @@ agent read both and tell you what it found:
 Read @cudaq-doc.md and @tutorial-guide.md, then give me a short summary of what
 each one covers. Just the wrap-up. No code or files yet.
 ```
+
+<br>
+<br>
 
 ---
 
@@ -55,15 +64,18 @@ then run it and show me the output.
 **Expected outcome:** `ghz.py` runs on the GPU and the counts show only two results — all
 zeros and all ones, about half each.
 
+<br>
+<br>
+
 ---
 
 ## 🖥️ Agentic coding with CUDA-Q — Advancing QAOA simulation 
 
-This is the core session of the bootcamp: a self-contained, natural-language prompt goes in, and a working, verified program comes out—powering a full quantum-application build.
+This is the core session of the bootcamp: a self-contained, natural-language prompt goes in, and a working, verified program comes out—powering a full quantum-application build.You will co-work with agents, solve a single problem:
 
-You will co-work with agents, solve a single problem:
 > Coloring a Taiwan map so that **no two neighboring areas share a color** using the Quantum Approximate Optimization Algorithm (QAOA)
-Along the way, you scale from a 16-qubit exact state-vector simulation to 36-qubit tensor-network and matrix product state simulation with CUDA-Q’s built-in optimization techniques, advancing the quantum simulation at scale:
+
+Along the way, you scale from a 16-qubit exact state-vector simulation to 36-qubit tensor-network and matrix product state simulation with CUDA-Q’s built-in optimization techniques, advancing the quantum simulation at scale.
 
 ![](data/learning_path.png)
 
@@ -82,6 +94,9 @@ Other ingredients:
 | `tutorial-guide.md` | conventions that every agent-built notebook follows to ensure reproducibility |
 | `helpers.py` | shared useful functions: map visualization, QUBO building, decoding/validation, etc |
 | `data/taiwan_map_xy.json` | simplified schematic of Taiwan's 19 main-island counties |
+
+<br>
+<br>
 
 ---
 
@@ -114,6 +129,9 @@ Structure:
 
 **Expected outcome:** `01_notebook.ipynb` with the new optimizer clearly beats
 notebook 00 on the same budget, and the map comes out validly colored.
+
+<br>
+<br>
 
 ---
 
@@ -157,6 +175,9 @@ Structure:
 **Expected outcome:** `02_notebook.ipynb` Successfully completed a 36-qubit simulation and obtained 
 valid colorings through sampling, with the map showing all 19 counties colored by zone.
 
+<br>
+<br>
+
 ---
 
 ## Step 3 — Reuse and optimize contraction paths
@@ -190,6 +211,9 @@ Structure:
 **Expected outcome:** `03_notebook.ipynb` runs the same optimization with contraction path reuse and 
 finishes noticeably faster, and the map is again validly colored.
 
+<br>
+<br>
+
 ---
 
 ## Step 4 — A fast approximate solver: Matrix product state
@@ -220,5 +244,8 @@ Structure:
 
 **Expected outcome:** `04_notebook.ipynb` with the `tensornet-mps` backend still delivers a
 validly colored map at a similar speed while using a tiny fraction of the memory.
+
+<br>
+<br>
 
 ---
