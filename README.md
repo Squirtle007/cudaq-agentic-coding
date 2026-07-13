@@ -1,7 +1,7 @@
 # CUDA-Q Agentic Coding Bootcamp
 
 In this hands-on bootcamp you drive a coding agent that writes, runs, and verifies
-GPU-accelerated quantum programs with CUDA-Q!🚀
+GPU-accelerated quantum programs with CUDA-Q! 🚀
 
 ## Setup
 
@@ -288,4 +288,4 @@ print the results, and briefly explain what they show.
 
 ---
 
-**Happy CUDA-Q agentic coding, and may every prompt become a GPU-accelerated quantum program that sparks your new idea!**✨
+**Happy CUDA-Q agentic coding, and may every prompt become a GPU-accelerated quantum program that sparks your new idea!** ✨
