@@ -286,4 +286,6 @@ print the results, and briefly explain what they show.
 
 <br>
 
-Happy CUDA-Q agentic coding, and may every prompt become a GPU-accelerated quantum program that sparks your new idea!✨
+---
+
+**Happy CUDA-Q agentic coding, and may every prompt become a GPU-accelerated quantum program that sparks your new idea!**✨
