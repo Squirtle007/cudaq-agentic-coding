@@ -240,3 +240,54 @@ validly colored map at a similar speed while using a tiny fraction of the memory
 <br>
 
 ---
+
+## 🧳 Bring-Your-Own-Code (BYOC)
+
+The same loop — prompt in, verified GPU program out — works beyond the tutorial. Two ways to
+make it yours: migrate code you already have, or build something new from scratch.
+
+<br>
+
+---
+
+### Part 1 — Code migration: Qiskit → CUDA-Q
+
+**Goal:** hand the agent an existing program and get a CUDA-Q version back. As an example,
+`my_code.py` is a small Qiskit program: a 3-qubit Quantum Fourier Transform applied to |001⟩,
+then undone with the inverse QFT. Have the agent migrate it to CUDA-Q, run it on the GPU, and
+check the results still match.
+
+Example prompt:
+```text
+Read my_code.py — a Qiskit implementation of the Quantum Fourier Transform.
+Migrate it to CUDA-Q as qft_cudaq.py, use @cudaq-doc.md as your reference: same
+circuit and the same |001> demo, running on the GPU ("nvidia" target). Then run
+both scripts and confirm the outputs match.
+```
+
+Bring your own script and swap it in — the recipe is the same: point the agent at your code
+and `@cudaq-doc.md`, ask for the CUDA-Q version, and let it verify against the original.
+
+<br>
+
+---
+
+### Part 2 — Open playground: build whatever you like
+
+**Goal:** no starting code needed — just an idea. Describe what you want in plain language,
+point the agent at the reference, and let it write, run, and explain a CUDA-Q program for you.
+
+Prompt template (fill in the brackets):
+```text
+Use @cudaq-doc.md as your reference. Write and run [filename].py with CUDA-Q:
+[describe your idea in a sentence or two]. Run it on the GPU ("nvidia" target),
+print the results, and briefly explain what they show.
+```
+
+Some ideas to spark yours: a W state across 25 qubits, Grover's search for a marked
+bitstring, a teleportation circuit, or a Bell state under depolarizing noise — anything
+covered by the reference is fair game.
+
+<br>
+
+---
