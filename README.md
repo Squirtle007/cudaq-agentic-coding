@@ -73,7 +73,7 @@ This is the core session of the bootcamp: a self-contained, natural-language pro
 
 Along the way, you scale from a 16-qubit exact state-vector simulation to 36-qubit tensor-network and matrix product state simulation with CUDA-Q’s built-in optimization techniques, advancing the quantum simulation at scale.
 
-![](data/learning_path.png)
+![](images/learning_path.png)
 
 | Notebook | Optimizer | Backend | The improvement it teaches |
 |---|---|---|---|
