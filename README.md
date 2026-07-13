@@ -279,15 +279,11 @@ point the agent at the reference, and let it write, run, and explain a CUDA-Q pr
 
 Prompt template (fill in the brackets):
 ```text
-Use @cudaq-doc.md as your reference. Write and run [filename].py with CUDA-Q:
-[describe your idea in a sentence or two]. Run it on the GPU ("nvidia" target),
+Use @cudaq-doc.md as your reference. Write and run <filename>.py with CUDA-Q:
+<describe your idea in a sentence or two>. Run it on the GPU ("nvidia" target),
 print the results, and briefly explain what they show.
 ```
 
-Some ideas to spark yours: a W state across 25 qubits, Grover's search for a marked
-bitstring, a teleportation circuit, or a Bell state under depolarizing noise — anything
-covered by the reference is fair game.
-
 <br>
 
----
+Happy CUDA-Q agentic coding, and may every prompt become a GPU-accelerated quantum program that sparks your new idea!✨
