@@ -227,7 +227,7 @@ Structure:
 3. Nelder-Mead from [0.1,0.1] FRESH (never 03's final angles).
    max_iterations=5; timed; print seconds/evaluation and best readout.
 4. SHOTS=2000; sample ONCE at optimized angles (post-optimization), timed;
-   summarize_samples; THE assert: helpers.is_valid(best) to verify validity..
+   summarize_samples; THE assert: helpers.is_valid(best) to verify validity.
 5. Map (counties by zone) + timing table, ONLY time rows: seconds/evaluation (03's vs
    chi=16's), ratio; verdict: sampled quality matches the exact backend at
    at-or-below cost, memory far smaller, readout untrustworthy — answers verified exactly
