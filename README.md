@@ -1,7 +1,6 @@
 # CUDA-Q Agentic Coding Bootcamp
 
-In this hands-on bootcamp you drive a coding agent that writes, runs, and verifies
-GPU-accelerated quantum programs with CUDA-Q! 🚀
+In this hands-on bootcamp, you use a coding agent—whether OpenCode, Claude, or Codex—to write, run, and verify GPU-accelerated quantum programs with CUDA-Q! 🚀
 
 ## Setup
 
@@ -35,8 +34,10 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 ## Warm-up 1 — Equip the agent with CUDA-Q knowledge
 
 **Goal:** the two markdown files in this folder are the agent's textbook (`cudaq-doc.md`) and
-rulebook (`tutorial-guide.md`) for everything that follows. Before asking for any code, have the
-agent read both and tell you what it found:
+rulebook (`tutorial-guide.md`) for everything that follows. Before asking for any code, have your
+agent read both and tell you what it found.
+
+Just copy the example prompt into your agent interface, such as the terminal:
 ```text
 Read @cudaq-doc.md and @tutorial-guide.md, then give me a short summary of what
 each one covers. Just the wrap-up. No code or files yet.
@@ -50,9 +51,7 @@ each one covers. Just the wrap-up. No code or files yet.
 
 **Goal:** run the agentic flow — prompt in, working GPU program out — on the
 "hello, world" of entanglement.  A GHZ state puts all qubits into a single superposition of
-all-zeros and all-ones, so every measurement comes back as one of exactly those two strings.
-
-Just copy the example prompt to your terminal:
+all-zeros and all-ones, so every measurement comes back as one of exactly those two strings:
 ```text
 Write a simple script ghz.py using CUDA-Q to prepare a 20-qubit GHZ state on the GPU
 ("nvidia" target), sample 1000 shots, and print the counts. Refer to @cudaq-doc.md if needed,
