@@ -14,7 +14,7 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 
 ## How the bootcamp works
 
-1. **Warm-up 0:** run `cudaq_basics.ipynb` yourself, top to bottom, to learn CUDA-Q hands-on.
+1. **Warm-up 0:** run `_intro_cudaq.ipynb` yourself, top to bottom, to learn CUDA-Q hands-on.
 2. **Warm-ups 1–2:** meet your coding agent — have it read the two references to streamline your learning experience.
 3. **Agentic coding with CUDA-Q:** start from the QAOA baseline in `00_notebook.ipynb`. Then, for Steps 1-4, copy or
    customize each prompt into your coding agent and let it iteratively build, optimize, and scale the CUDA-Q program.
