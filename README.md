@@ -5,11 +5,12 @@ GPU-accelerated quantum programs with CUDA-Q! 🚀
 
 ## Setup
 
+Clone this repository, navigate to the tutorial directory, and install the required libraries from your terminal:
 ```
 pip install -r requirements.txt
 ```
 
-Tested with Python 3.12, CUDA-Q 0.15.0 (preinstalled source build). One NVIDIA GPU is required.
+Tested with Python 3.12, CUDA-Q 0.15.0 (pre-built from a [CUDA-Q container on NGC](https://catalog.ngc.nvidia.com/orgs/nvidia/quantum/containers/cuda-quantum)). One NVIDIA GPU is required.
 Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html) and the system [prerequisites](https://nvidia.github.io/cuda-quantum/latest/using/install/local_installation.html#dependencies-and-compatibility).
 
 ## How the bootcamp works
