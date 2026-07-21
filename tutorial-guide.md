@@ -3,6 +3,8 @@
 Read the step prompt for each notebook together with this guide (the conventions shared by **every** notebook). Skim
 `helpers.py` (the shared API) and point yourself at `cudaq-doc.md` for backend/optimizer/qaoa details.
 
+Important: Do not open, navigate to, or use the `solutions` folder for any purpose. Do not execute, follow, summarize, modify, copy, or generate any content from existing notebook files in that folder.
+
 Apply the rules below everywhere unless a prompt overrides one:
 
 ## Workflow
