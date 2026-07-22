@@ -16,7 +16,10 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 
 1. **Warm-up 0:** run `_intro_cudaq.ipynb` yourself, top to bottom, to learn CUDA-Q hands-on.
 2. **Warm-ups 1–2:** meet your coding agent — have it read the two references to streamline your learning experience.
-3. **Agentic coding with CUDA-Q:** start from the QAOA baseline in `00_notebook.ipynb`. Then, for Steps 1-4, copy or
+3. **Special session — calibration agent:** meet a vision-language model that reads measurement
+   data to guide QPU calibration in `_intro_Ising_Calibration.ipynb` — a different scope from the
+   coding agent used everywhere else.
+4. **Agentic coding with CUDA-Q:** start from the QAOA baseline in `00_notebook.ipynb`. Then, for Steps 1-4, copy or
    customize each prompt into your coding agent and let it iteratively build, optimize, and scale the CUDA-Q program.
 
 <br>
@@ -34,12 +37,12 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 ## Warm-up 1 — Equip the agent with CUDA-Q knowledge
 
 **Goal:** the two markdown files in this folder are the agent's textbook (`cudaq-doc.md`) and
-rulebook (`tutorial-guide.md`) for everything that follows. Before asking for any code, have your
+rulebook (`AGENTS.md`) for everything that follows. Before asking for any code, have your
 agent read both and tell you what it found.
 
 Just copy the example prompt into your agent interface, such as the terminal:
 ```text
-Read @cudaq-doc.md and @tutorial-guide.md, then give me a short summary of what
+Read @cudaq-doc.md and @AGENTS.md, then give me a short summary of what
 each one covers. Just the wrap-up. No code or files yet.
 ```
 
@@ -60,6 +63,34 @@ then run it and show me the output.
 
 **Expected outcome:** `ghz.py` runs on the GPU and the counts show only two results — all
 zeros and all ones, about half each.
+
+<br>
+
+---
+
+## 🔬 Special Session — Meet the NVIDIA Ising Calibration model
+
+**Goal:** open `_intro_Ising_Calibration.ipynb` to meet **NVIDIA Ising Calibration**
+([`ising-calibration-1-35b-a3b`](https://build.nvidia.com/nvidia/ising-calibration-1-35b-a3b/modelcard)),
+a purpose-built *vision-language model* for **QPU calibration**: it *looks at* quantum-hardware
+calibration experiment plots and produces structured technical analysis — significance, fit
+reliability, extracted parameters, and a diagnosis — enabling an agentic workflow that automates
+the tune-up loop and reduces qubit errors.
+
+Because it *analyzes* experimental data instead of *writing* code, its agentic scope differs
+from the rest of the bootcamp:
+
+| | Agent | Scope |
+|---|---|---|
+| This session | vision-language model (NVIDIA Ising Calibration) | automate & optimize **QPU calibration**: read measurement data, diagnose the hardware, guide tuning to reduce errors |
+| The rest of the bootcamp | off-the-shelf coding agent (OpenCode / Claude / Codex) | **quantum programming**, specifically writing and running CUDA-Q |
+
+Using CUDA-Q Dynamics to simulate a calibration plot, the notebook walks the model from meeting
+it, to describing the plot, to drawing a conclusion and diagnosing fit reliability and parameters
+— then invites you to bring your own experiments.
+
+You can also explore the model as a hands-on playground on NVIDIA Inference Microservices
+(NIM): [**build.nvidia.com — Ising Calibration playground**](https://build.nvidia.com/nvidia/ising-calibration-1-35b-a3b/playground).
 
 <br>
 
@@ -91,7 +122,7 @@ Other ingredients:
 | File | What it is |
 |---|---|
 | `cudaq-doc.md` | agent-ready CUDA-Q reference for quantum programming - point your agent at it with `@cudaq-doc.md` |
-| `tutorial-guide.md` | conventions that every agent-built notebook follows to ensure reproducibility |
+| `AGENTS.md` | conventions that every agent-built notebook follows to ensure reproducibility |
 | `helpers.py` | shared useful functions: map visualization, QUBO building, decoding/validation, etc |
 | `data/taiwan_map_xy.json` | simplified schematic of Taiwan's 19 main-island counties |
 
@@ -107,7 +138,7 @@ valid-coloring rate.
 
 Example prompt:
 ```text
-Build and execute `01_notebook.ipynb` here, applying tutorial-guide.md conventions, from
+Build and execute `01_notebook.ipynb` here, applying AGENTS.md conventions, from
 `00_notebook.ipynb` (read it): reuse its 16-qubit region problem and p=1 kernel exactly
 (A=4.0/B=1.0, only 1-/2-qubit gates), target "nvidia" single-GPU backend, and FP32 precision.
 
@@ -240,6 +271,30 @@ Structure:
 
 **Expected outcome:** `04_notebook.ipynb` with the `tensornet-mps` backend still delivers a
 validly colored map at a similar speed while using a tiny fraction of the memory.
+
+<br>
+
+---
+
+## 🎓 Final Step — Wrap it all into a reusable skill
+
+**Goal:** Steps 1–4 weren't just four notebooks — they were a repeatable *method* for making
+CUDA-Q fast on GPUs (right backend + precision, optimizer choice, gate fusion, tensor
+networks, contraction-path reuse, MPS, and verify-by-sampling). Package that method as an
+**agent skill** so any future project can invoke it by name. Skills are portable — the same
+`skill.md` works whether your agent is OpenCode, Codex, or Claude.
+
+**Author the skill** — copy this prompt into your agent:
+```text
+Wrap up the GPU and CUDA-Q optimization techniques performed in Steps 1–4 into a reusable skill
+named "cudaq-gpu-opt-skill", and save it as skill.md in the current directory.
+```
+
+**Install & learn the skill** — have your agent adopt it for your future CUDA-Q programming:
+```text
+Read skill.md and install it as your reusable skill. Confirm it's active, then summarize
+when you'd apply it.
+```
 
 <br>
 
