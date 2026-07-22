@@ -731,6 +731,8 @@ Unfortunately, there is no such handy visualization for multi-qubit states. In p
 A CUDA-Q kernel can be visualized using the `cudaq.draw` API which returns a string representing the drawing of the execution path, in the specified format. ASCII (default) and LaTeX formats are supported.
 
 ```python
+import math
+
 @cudaq.kernel
 def kernel_to_draw():
     q = cudaq.qvector(4)
@@ -743,7 +745,7 @@ def kernel_to_draw():
     swap(q[0], q[3])
     swap(q[1], q[2])
 
-    r1(3.14159, q[0])
+    r1(math.pi, q[0])
     tdg(q[1])
     s(q[2])
 ```
