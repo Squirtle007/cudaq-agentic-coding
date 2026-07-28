@@ -284,6 +284,7 @@ Structure:
 
 **Expected outcome:** `03_notebook.ipynb` runs the same optimization with contraction-path reuse and
 finishes noticeably faster, and the map is again validly colored.
+
 **Nice-to-have:** Set `os.environ["CUDAQ_TIMING_TAGS"] = "9"` to show a timing breakdown for each execution step, including pathfinding time.
 
 <br>
