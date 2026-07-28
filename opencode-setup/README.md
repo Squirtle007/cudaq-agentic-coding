@@ -140,8 +140,6 @@ Then make a real call:
 opencode run "hello opencode"
 ```
 
-A one-word answer means install, key, config, and routing are all correct. **You're done.**
-
 > If the model name is ever rejected, ask the API which names it currently serves and copy
 > the exact string into the `id` field:
 > ```bash
