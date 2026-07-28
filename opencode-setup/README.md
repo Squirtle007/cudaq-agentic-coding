@@ -1,5 +1,7 @@
 # OpenCode Setup
 
+> The instructions below are for post-bootcamp setup - OpenCode is preinstalled for the bootcamp, so no installation is needed.
+
 Get [**OpenCode**](https://opencode.ai/docs/) — an open-source coding agent that runs in your
 terminal — working with **NVIDIA Nemotron 3 Ultra** in about five minutes.
 
