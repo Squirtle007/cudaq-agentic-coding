@@ -16,16 +16,12 @@ once you finish you can point OpenCode at whatever you like.
 curl -fsSL https://opencode.ai/install | bash
 ```
 
-That one command covers **Linux, macOS, and WSL**. Inside WSL you run it in the WSL
-terminal exactly as written — WSL *is* Linux, so there's no separate installer for it.
+That one command covers **Linux, macOS, and WSL**:
 
 > **On Windows, use WSL.** It's what OpenCode recommends, and what this guide assumes.
 > If you don't have it yet, follow the
 > [WSL setup guide](https://opencode.ai/docs/windows-wsl), open the WSL terminal, then
 > run the command above.
->
-> Keep your project files inside WSL's own filesystem (`~/my-project`) rather than on the
-> mounted Windows drive (`/mnt/c/...`) — it's noticeably faster.
 
 Prefer a package manager? Any of these work equally well
 ([all install options](https://opencode.ai/docs/)):
@@ -90,8 +86,7 @@ nano ~/.config/opencode/opencode.json     # or vim, code, gedit — any editor
 "apiKey": "nvapi-PASTE-YOUR-KEY-HERE"     // ← replace this line's value with your key
 ```
 
-It should end up looking like `"apiKey": "nvapi-xxxxxxxxxxxxxxxx"`. Keep the quotes, and
-don't add a `Bearer ` prefix — just the token.
+It should end up looking like `"apiKey": "nvapi-xxxxxxxxxxxxxxxx"`. Must keep the prefix: `nvapi-`, but don't add a `Bearer `.
 
 Here is the whole file for reference, with the one line you edit marked:
 
@@ -105,7 +100,7 @@ Here is the whole file for reference, with the one line you edit marked:
       "name": "NVIDIA NIM",
       "options": {
         "baseURL": "https://integrate.api.nvidia.com/v1",
-        "apiKey": "nvapi-PASTE-YOUR-KEY-HERE"        // ← your key goes here
+        "apiKey": "nvapi-PASTE-YOUR-KEY-HERE"        // ← your key goes here!
       },
       "models": {
         "nemotron-3-ultra-550b-a55b": {
@@ -160,7 +155,7 @@ cd /path/to/your/project
 opencode
 ```
 
-Useful things inside the session:
+Useful commands inside the session:
 
 | | |
 |---|---|
@@ -170,11 +165,6 @@ Useful things inside the session:
 | `/undo` | revert the last change the agent made |
 | `Ctrl+C` / `/exit` | quit |
 
-One-shot, no session — handy in scripts:
-
-```bash
-opencode run "explain what this repo does"
-```
 
 **`AGENTS.md` is worth knowing about.** If a folder contains one, OpenCode reads it
 automatically and follows it as project instructions — conventions, build commands, house
