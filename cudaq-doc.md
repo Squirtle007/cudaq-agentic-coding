@@ -118,7 +118,7 @@ def kernel():
     C = cudaq.qvector(5)
 ```
 
-Inputs to kernels are defined by specifying a parameter in the kernel definition along with the appropriate type. The kernel below takes an integer to define a register of N qubits.
+Inputs to kernels are defined by specifying a parameter in the kernel definition along with the appropriate type. The kernel below takes an integer to define a register of N qubits. Important note: type-annotate every kernel argument — CUDA-Q rejects bare parameters.
 
 ```python
 N = 2
