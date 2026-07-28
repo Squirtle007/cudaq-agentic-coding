@@ -1,13 +1,12 @@
 # OpenCode Setup
 
-Get [OpenCode](https://opencode.ai/docs/) — an open-source coding agent that runs in your
+Get [**OpenCode**](https://opencode.ai/docs/) — an open-source coding agent that runs in your
 terminal — working with **NVIDIA Nemotron 3 Ultra** in about five minutes.
 
 This folder is self-contained. It sets up the agent itself, not any particular project, so
 once you finish you can point OpenCode at whatever you like.
 
-**You need:** a terminal on Linux, macOS, or Windows/WSL2 · `curl` · a free account at
-[build.nvidia.com](https://build.nvidia.com).
+**You need:** a terminal on Linux, macOS, or Windows/WSL2 · `curl` · a free account at [**NVIDIA Inference Microservices (NIM)**](https://build.nvidia.com).
 
 ---
 
@@ -17,11 +16,22 @@ once you finish you can point OpenCode at whatever you like.
 curl -fsSL https://opencode.ai/install | bash
 ```
 
+That one command covers **Linux, macOS, and WSL**. Inside WSL you run it in the WSL
+terminal exactly as written — WSL *is* Linux, so there's no separate installer for it.
+
+> **On Windows, use WSL.** It's what OpenCode recommends, and what this guide assumes.
+> If you don't have it yet, follow the
+> [WSL setup guide](https://opencode.ai/docs/windows-wsl), open the WSL terminal, then
+> run the command above.
+>
+> Keep your project files inside WSL's own filesystem (`~/my-project`) rather than on the
+> mounted Windows drive (`/mnt/c/...`) — it's noticeably faster.
+
 Prefer a package manager? Any of these work equally well
 ([all install options](https://opencode.ai/docs/)):
 
 ```bash
-npm install -g opencode-ai          # npm
+npm install -g opencode-ai          # npm — Linux / macOS / WSL / Windows
 brew install anomalyco/tap/opencode # macOS / Homebrew
 sudo pacman -S opencode             # Arch Linux
 ```
@@ -109,35 +119,6 @@ Here is the whole file for reference, with the one line you edit marked:
 }
 ```
 
-> **The `id` field matters.** It is what actually gets sent to the API. NVIDIA model names
-> contain a slash (`nvidia/…`); without `id`, OpenCode would transmit the shorter JSON key
-> and the request would fail. Leave it as-is.
-
-> **Keep this file private.** It now holds a live credential. It lives in your home
-> directory, outside any project folder, so it won't be committed by accident — but don't
-> paste it into chats, tickets, or screenshots.
-
-<details>
-<summary>Prefer to keep the key out of the file?</summary>
-
-OpenCode can read it from an environment variable instead, via
-[`{env:...}` substitution](https://opencode.ai/docs/config/). Set the `apiKey` line to:
-
-```json
-"apiKey": "{env:NVIDIA_API_KEY}"
-```
-
-then export the key in every shell that runs `opencode`:
-
-```bash
-echo 'export NVIDIA_API_KEY="nvapi-your-key-here"' >> ~/.bashrc
-```
-
-Use `~/.zshrc` if your shell is zsh, and open a new terminal afterwards. This keeps the
-credential out of the config file, at the cost of one more thing to set up.
-
-</details>
-
 ---
 
 ## 5. Verify it works
@@ -159,7 +140,7 @@ You should see `nvidia/nemotron-3-ultra-550b-a55b` — that's the one your confi
 Then make a real call:
 
 ```bash
-opencode run "reply with the single word: ok"
+opencode run "hello opencode"
 ```
 
 A one-word answer means install, key, config, and routing are all correct. **You're done.**
