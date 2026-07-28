@@ -64,8 +64,7 @@ The same key works for every model in the
 > **Re-run this step after every config change.** OpenCode reads the *installed* copy in
 > `~/.config/opencode/`, not the one in this folder. So whenever you reconfigure
 > `opencode.json` here — switching the model, editing the provider — copy it across again
-> with the two commands below, then restart `opencode`. Edit the file in this folder and
-> nothing changes until you do.
+> with the two commands below, then restart `opencode`.
 
 Copy the `opencode.json` from this folder into OpenCode's global config directory:
 
