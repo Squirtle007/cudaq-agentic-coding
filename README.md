@@ -73,7 +73,7 @@ zeros and all ones, about half each.
 ## 🔬 Special Session — Meet the NVIDIA Ising Calibration model
 
 **Goal:** open `_intro_Ising_Calibration.ipynb` to meet **NVIDIA Ising Calibration**
-([`ising-calibration-1.5-35b-a3b`](https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/modelcard)),
+([`ising-calibration-1.5-31b`](https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/modelcard)),
 a purpose-built *vision-language model* for **QPU calibration**: it *looks at* quantum-hardware
 calibration experiment plots and produces structured technical analysis — significance, fit
 reliability, extracted parameters, and a diagnosis — enabling an agentic workflow that automates
