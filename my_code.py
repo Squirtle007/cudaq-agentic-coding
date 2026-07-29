@@ -12,6 +12,7 @@ Circuit structure:
 
 from math import pi
 
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 
@@ -38,11 +39,8 @@ print("\nQFT of |001>:")
 state = Statevector(circuit)
 
 for index in range(2**num_qubits):
-    amplitude = state[index]
-
-    # Round to 3 decimals; the + 0.0 turns a stray "-0.000" back into "0.000".
-    real = round(amplitude.real, 3) + 0.0
-    imag = round(amplitude.imag, 3) + 0.0
+    # Round to 3 decimals; the + 0j turns a stray "-0.000" back into "0.000".
+    amplitude = np.round(state[index], 3) + 0j
 
     label = format(index, f"0{num_qubits}b")
-    print(f"|{label}>: {real:.3f}{imag:+.3f}j")
+    print(f"|{label}>: {amplitude:.3f}")
