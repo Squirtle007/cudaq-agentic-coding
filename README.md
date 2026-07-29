@@ -418,4 +418,21 @@ print the results, and briefly explain what they show.
 
 ---
 
+## 🧰 Takeaways — playbook for your CUDA-Q agent 
+
+Three things to carry into your own CUDA-Q projects after the bootcamp:
+
+| Take-away | What it is | How to use it |
+|---|---|---|
+| `cudaq-doc.md` | CUDA-Q reference for your agent | point at it in any prompt: `@cudaq-doc.md` |
+| `SKILL.md` — your `cudaq-gpu-opt-skill` | the GPU optimization method from Steps 1–4 | keep the file, and install it in your own agent for future CUDA-Q work |
+| `cudaq-guide` — NVIDIA's [official skill](https://github.com/NVIDIA/skills/tree/main/skills/cudaq-guide) | CUDA-Q onboarding: install, simulate, run on QPUs | `npx skills add nvidia/skills --skill cudaq-guide` — see `opencode-setup/README.md` |
+
+Two skills, two jobs: `cudaq-guide` helps your agent write CUDA-Q, and
+`cudaq-gpu-opt-skill` makes your CUDA-Q script run with advanced GPU optimization.
+
+<br>
+
+---
+
 **Happy CUDA-Q agentic coding, and may every prompt become a GPU-accelerated quantum program that sparks your new idea!** ✨
