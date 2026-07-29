@@ -178,6 +178,25 @@ style. Project files win over the global `~/.config/opencode/AGENTS.md`; see
 
 ---
 
+## 7. Add the official CUDA-Q skill
+
+A skill is a reusable instruction set that teaches your agent a topic. NVIDIA publishes
+[CUDA-X skills for agents](https://github.com/NVIDIA/skills), and
+[**`cudaq-guide`**](https://github.com/NVIDIA/skills/tree/main/skills/cudaq-guide) covers
+CUDA-Q installation, GPU simulation, QPU hardware, and applications:
+
+```bash
+npx skills add nvidia/skills --skill cudaq-guide --agent opencode --yes
+```
+
+It lands in `~/.config/opencode/skills/cudaq-guide/`. Restart `opencode`, then just ask a
+CUDA-Q question — the agent picks the skill up on its own.
+
+> Needs Node for `npx`. Skills are portable: swap `--agent` for `claude-code`, `codex`, or
+> `cursor` to install the same skill elsewhere.
+
+---
+
 ## Troubleshooting
 
 | Symptom | Fix |
