@@ -383,16 +383,33 @@ make it yours: migrate code you already have, or build something new from scratc
 ### Part 1 — Code migration: Qiskit → CUDA-Q
 
 **Goal:** hand the agent an existing program and get a CUDA-Q version back. As an example,
-`my_code.py` is a small Qiskit program: a 3-qubit Quantum Fourier Transform applied to |001⟩,
-then undone with the inverse QFT. Have the agent migrate it to CUDA-Q, run it on the GPU, and
-check the results still match.
+`my_code.py` is a small Qiskit program: a 3-qubit Quantum Fourier Transform applied to |001⟩.
+Have the agent migrate it to CUDA-Q, run it on the GPU, and check the results still match.
 
 Example prompt:
 ```text
-Read my_code.py — a Qiskit implementation of the Quantum Fourier Transform.
-Migrate it to CUDA-Q as qft_cudaq.py, use @cudaq-doc.md as your reference: same
-circuit and the same |001> demo, running on the GPU ("nvidia" target). Then run
-both scripts and confirm the outputs match.
+Please port our Qiskit demo in my_code.py to CUDA-Q, using @cudaq-doc.md as your
+reference: a 3-qubit Quantum Fourier Transform on |001>, printing its 8 amplitudes.
+Write it to qft_cudaq.py as a flat ~30-line script — no classes, no helpers, nothing
+past the printing. It is a plain .py file, so AGENTS.md's notebook conventions do not
+apply here.
+
+Target the GPU with cudaq.set_target("nvidia") and keep the whole circuit in ONE
+@cudaq.kernel that allocates its own cudaq.qvector(3) — a second kernel would
+allocate three more qubits and quietly hand you a 6-qubit state.
+
+The circuit: x on qubit 0 to prepare |001>; then count the target down with
+range(2, -1, -1) (kernels do not understand reversed()) — h on the target, then for
+each control below it, also counting down, a controlled phase of
+pi / 2**(target - control), which CUDA-Q spells r1.ctrl(angle, control, target).
+Finish by swapping qubit 0 with qubit 2.
+
+Read the result as numpy.array(cudaq.get_state(kernel)), a plain 8-element array you
+index over range(8) — never iterate the state object itself, it wraps around forever
+instead of stopping. For each amplitude take real = round(a.real, 3) + 0.0 and
+likewise imag (the + 0.0 keeps a stray "-0.000" out), then
+print(f"|{i:03b}>: {real:.3f}{imag:+.3f}j"), giving 8 lines that start with
+|000>: 0.354+0.000j. Run it, then confirm all eight amplitudes match my_code.py.
 ```
 
 Bring your own script and swap it in — the recipe is the same: point the agent at your code

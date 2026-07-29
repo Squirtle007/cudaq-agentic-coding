@@ -15,51 +15,34 @@ from math import pi
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 
-
-def qft(num_qubits: int) -> QuantumCircuit:
-    """Create a Quantum Fourier Transform circuit."""
-    circuit = QuantumCircuit(num_qubits, name="QFT")
-
-    # Apply Hadamard gates and controlled phase rotations.
-    for target in reversed(range(num_qubits)):
-        circuit.h(target)
-
-        for control in reversed(range(target)):
-            distance = target - control
-            angle = pi / (2**distance)
-            circuit.cp(angle, control, target)
-
-    # Reverse the qubit order.
-    for qubit in range(num_qubits // 2):
-        circuit.swap(qubit, num_qubits - qubit - 1)
-
-    return circuit
-
-
-def inverse_qft(num_qubits: int) -> QuantumCircuit:
-    """Create an inverse Quantum Fourier Transform circuit."""
-    return qft(num_qubits).inverse()
-
-
-# Create and display a three-qubit QFT.
 num_qubits = 3
-qft_circuit = qft(num_qubits)
-print(qft_circuit.draw())
 
-# Prepare |001> and apply the QFT.
+# Prepare |001>, then apply the QFT.
 circuit = QuantumCircuit(num_qubits)
 circuit.x(0)
-circuit.compose(qft_circuit, inplace=True)
+
+for target in range(num_qubits - 1, -1, -1):
+    circuit.h(target)
+
+    for control in range(target - 1, -1, -1):
+        angle = pi / 2 ** (target - control)
+        circuit.cp(angle, control, target)
+
+# Reverse the qubit order.
+for qubit in range(num_qubits // 2):
+    circuit.swap(qubit, num_qubits - qubit - 1)
+
+print(circuit.draw())
 
 print("\nQFT of |001>:")
-qft_state = Statevector.from_instruction(circuit)
+state = Statevector(circuit)
 
-for basis_state, amplitude in qft_state.to_dict().items():
-    print(f"|{basis_state}>: {amplitude:.3f}")
+for index in range(2**num_qubits):
+    amplitude = state[index]
 
-# Apply the inverse QFT to recover |001>.
-circuit.compose(inverse_qft(num_qubits), inplace=True)
+    # Round to 3 decimals; the + 0.0 turns a stray "-0.000" back into "0.000".
+    real = round(amplitude.real, 3) + 0.0
+    imag = round(amplitude.imag, 3) + 0.0
 
-print("\nAfter QFT followed by inverse QFT:")
-recovered_state = Statevector.from_instruction(circuit)
-print(recovered_state.probabilities_dict())
+    label = format(index, f"0{num_qubits}b")
+    print(f"|{label}>: {real:.3f}{imag:+.3f}j")
