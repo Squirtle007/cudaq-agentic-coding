@@ -73,7 +73,7 @@ zeros and all ones, about half each.
 ## 🔬 Special Session — Meet the NVIDIA Ising Calibration model
 
 **Goal:** open `_intro_Ising_Calibration.ipynb` to meet **NVIDIA Ising Calibration**
-([`ising-calibration-1-35b-a3b`](https://build.nvidia.com/nvidia/ising-calibration-1-35b-a3b/modelcard)),
+([`ising-calibration-1.5-35b-a3b`](https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/modelcard)),
 a purpose-built *vision-language model* for **QPU calibration**: it *looks at* quantum-hardware
 calibration experiment plots and produces structured technical analysis — significance, fit
 reliability, extracted parameters, and a diagnosis — enabling an agentic workflow that automates
@@ -92,7 +92,7 @@ it, to describing the plot, to drawing a conclusion and diagnosing fit reliabili
 — then invites you to bring your own experiments.
 
 You can also explore the model as a hands-on playground on NVIDIA Inference Microservices
-(NIM): [**build.nvidia.com — Ising Calibration playground**](https://build.nvidia.com/nvidia/ising-calibration-1-35b-a3b/playground).
+(NIM): [**build.nvidia.com — Ising Calibration playground**](https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/playground).
 
 <br>
 
@@ -344,17 +344,19 @@ it, then the method itself in markdown.
 Keep that `SKILL.md` — it is your portable copy, and all you need to set the skill up again
 on another machine or with another agent.
 
-**Install the skill** — agents discover skills from a folder, one subfolder per skill:
+**Install the skill** — agents load skills from a folder, one subfolder per skill. This
+prompt uses OpenCode's; if you are on another agent, swap the folder:
 ```text
-Install SKILL.md as an active skill for yourself: put a copy at
-<your-skills-folder>/cudaq-gpu-opt-skill/SKILL.md, then confirm you can see the skill and
-summarize when you'd apply it.
+Install SKILL.md as an active skill for yourself: copy it to
+~/.config/opencode/skills/cudaq-gpu-opt-skill/SKILL.md, then confirm you can see the skill
+and summarize when you'd apply it.
 ```
 
-Only the folder differs per agent — OpenCode reads `.opencode/skills/`
-([docs](https://opencode.ai/docs/skills/)), Codex reads `.codex/skills/`, Claude reads
-`.claude/skills/`, and each has a `~/`-prefixed twin that applies to every project. Ask your
-agent where its folder is; the `SKILL.md` inside is identical either way.
+Only that folder changes per agent — Codex reads `~/.codex/skills/`, Claude reads
+`~/.claude/skills/`, and each has a project-local twin (`.opencode/skills/`,
+`.codex/skills/`, `.claude/skills/`) that applies to one repo instead of all of them
+([OpenCode docs](https://opencode.ai/docs/skills/)). The `SKILL.md` inside is identical
+either way.
 
 **Expected outcome:** `SKILL.md` saved here as your reusable copy, and your agent reports the
 skill as active — ready to invoke by name in your next CUDA-Q project.
