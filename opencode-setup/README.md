@@ -165,7 +165,7 @@ Useful commands inside the session:
 | | |
 |---|---|
 | `@path/to/file` | pull a file into the conversation |
-| `/init` | scan the project and write an `AGENTS.md` for it |
+| `/init` | write an `AGENTS.md` for a project that doesn't have one yet |
 | `/models` | switch model mid-session |
 | `/undo` | revert the last change the agent made |
 | `Ctrl+C` / `/exit` | quit |
@@ -186,6 +186,6 @@ style. Project files win over the global `~/.config/opencode/AGENTS.md`; see
 | `401` / `403` / "invalid API key" | The placeholder is probably still in place. Check `grep apiKey ~/.config/opencode/opencode.json` — if it still says `PASTE-YOUR-KEY-HERE`, redo step 4. Paste the bare token, no `Bearer ` prefix. |
 | `404` / "model not found" | The model name drifted. Run the `curl` in step 5 and copy the exact string into `id`. |
 | Config seems ignored | A project-level `opencode.json` in your current folder overrides the global one. Check for it. |
-| Changes to `opencode.json` do nothing | Restart `opencode` — config is read at startup. |
+| Changes to `opencode.json` do nothing | Either you edited the copy in this folder instead of the installed one — redo step 3 — or `opencode` is still running. Restart it; config is read at startup. |
 | "Unexpected token" / config won't load | A stray comma or missing quote from step 4. Validate with `python3 -m json.tool ~/.config/opencode/opencode.json` |
 | Slow or truncated replies | Expected on a 550B model for long inputs. Narrow the request and try again. |
