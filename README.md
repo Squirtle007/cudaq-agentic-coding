@@ -330,20 +330,34 @@ validly colored map at a similar speed while using a tiny fraction of the memory
 **Goal:** Steps 1–4 weren't just four notebooks — they were a repeatable *method* for making
 CUDA-Q fast on GPUs (right backend + precision, optimizer choice, gate fusion, tensor
 networks, contraction-path reuse, MPS, and verify-by-sampling). Package that method as an
-**agent skill** so any future project can invoke it by name. Skills are portable — the same
-`skill.md` works whether your agent is OpenCode, Codex, or Claude.
+**agent skill** so any future project can invoke it by name. `SKILL.md` is an open format —
+OpenCode, Codex, and Claude all read the same file.
 
 **Author the skill** — copy this prompt into your agent:
 ```text
-Wrap up the GPU and CUDA-Q optimization techniques performed in Steps 1–4 into a reusable skill
-named "cudaq-gpu-opt-skill", and save it as skill.md in the current directory.
+Wrap up the GPU and CUDA-Q optimization techniques performed in Steps 1–4 into a reusable
+skill named "cudaq-gpu-opt-skill". Save it as SKILL.md in this folder, starting with YAML
+frontmatter holding a name that matches the skill name and a description saying when to use
+it, then the method itself in markdown.
 ```
 
-**Install & learn the skill** — have your agent adopt it for your future CUDA-Q programming:
+Keep that `SKILL.md` — it is your portable copy, and all you need to set the skill up again
+on another machine or with another agent.
+
+**Install the skill** — agents discover skills from a folder, one subfolder per skill:
 ```text
-Read skill.md and install it as your reusable skill. Confirm it's active, then summarize
-when you'd apply it.
+Install SKILL.md as an active skill for yourself: put a copy at
+<your-skills-folder>/cudaq-gpu-opt-skill/SKILL.md, then confirm you can see the skill and
+summarize when you'd apply it.
 ```
+
+Only the folder differs per agent — OpenCode reads `.opencode/skills/`
+([docs](https://opencode.ai/docs/skills/)), Codex reads `.codex/skills/`, Claude reads
+`.claude/skills/`, and each has a `~/`-prefixed twin that applies to every project. Ask your
+agent where its folder is; the `SKILL.md` inside is identical either way.
+
+**Expected outcome:** `SKILL.md` saved here as your reusable copy, and your agent reports the
+skill as active — ready to invoke by name in your next CUDA-Q project.
 
 <br>
 
