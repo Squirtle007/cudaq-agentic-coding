@@ -2,6 +2,8 @@
 
 In this hands-on bootcamp, you use a coding agent—whether OpenCode, Claude, or Codex—to write, run, and verify GPU-accelerated quantum programs with CUDA-Q! 🚀
 
+![](assets/quick_guide.png)
+
 ## Setup
 
 Clone this repository, navigate to the tutorial directory, and install the required libraries from your terminal:
@@ -70,7 +72,7 @@ zeros and all ones, about half each.
 
 ---
 
-## 🔬 Special Session — Meet the NVIDIA Ising Calibration model
+## 🔬 Special Session 3 — Meet the NVIDIA Ising Calibration
 
 **Goal:** open `_intro_Ising_Calibration.ipynb` to meet **NVIDIA Ising Calibration**
 ([`ising-calibration-1.5-31b`](https://build.nvidia.com/nvidia/ising-calibration-1.5-31b/modelcard)),
@@ -163,7 +165,7 @@ Other ingredients:
 | `AGENTS.md` | conventions that every agent-built notebook follows to ensure reproducibility |
 | `helpers.py` | shared useful functions: map visualization, QUBO building, decoding/validation, etc. |
 | `data/taiwan_map_xy.json` | simplified schematic of Taiwan's 19 main-island counties |
-| `assets/quick_guide.pdf` | printable quick-start walkthrough of the bootcamp |
+| `assets/quick_guide.png` | the quick-start map of the bootcamp shown at the top of this page |
 | `assets/nim_api_key_setup.pdf` | step-by-step for getting your NVIDIA NIM API key |
 
 <br>
