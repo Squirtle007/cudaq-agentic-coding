@@ -208,3 +208,4 @@ CUDA-Q question — the agent picks the skill up on its own.
 | Changes to `opencode.json` do nothing | Either you edited the copy in this folder instead of the installed one — redo step 3 — or `opencode` is still running. Restart it; config is read at startup. |
 | "Unexpected token" / config won't load | A stray comma or missing quote from step 4. Validate with `python3 -m json.tool ~/.config/opencode/opencode.json` |
 | Slow or truncated replies | Expected on a 550B model for long inputs. Narrow the request and try again. |
+| The model stops responding | Type `/models` in the session to list what's available and switch to another one. |
