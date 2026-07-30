@@ -435,7 +435,7 @@ Three things to carry into your own CUDA-Q projects after the bootcamp:
 |---|---|---|
 | `cudaq-doc.md` | CUDA-Q reference for your agent | point at it in any prompt: `@cudaq-doc.md` |
 | `SKILL.md` — your `cudaq-gpu-opt-skill` | the GPU optimization method from Steps 1–4 | keep the file, and install it in your own agent for future CUDA-Q work |
-| `cudaq-guide` — NVIDIA's [official skill](https://github.com/NVIDIA/skills/tree/main/skills/cudaq-guide) | CUDA-Q onboarding: install, simulate, run on QPUs | refer to **[opencode-setup → step 7 in README](opencode-setup/README.md#7-add-the-official-cuda-q-skill)** |
+| `cudaq-guide` — NVIDIA's [official skill](https://github.com/NVIDIA/skills/tree/main/skills/cudaq-guide) | CUDA-Q onboarding: install, simulate, run on QPUs | refer to **[opencode-setup → step 7](opencode-setup/README.md#7-add-the-official-cuda-q-skill)** |
 
 Two skills, two jobs: `cudaq-guide` helps your agent write CUDA-Q, and
 `cudaq-gpu-opt-skill` makes your CUDA-Q script run with advanced GPU optimization.
