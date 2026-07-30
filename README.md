@@ -383,22 +383,21 @@ make it yours: migrate code you already have, or build something new from scratc
 ### Part 1 — Code migration: Qiskit → CUDA-Q
 
 **Goal:** hand the agent an existing program and get a CUDA-Q version back. As an example,
-`my_code.py` is a small Qiskit program: a 3-qubit Quantum Fourier Transform applied to |001⟩.
-Have the agent migrate it to CUDA-Q, run it on the GPU, and check the results still match.
+`my_code.py` is a small Qiskit program: a 3-qubit Grover search that amplifies the marked
+state |111⟩. Have the agent migrate it to CUDA-Q, run it, and check the result still matches.
 
 Example prompt:
 ```text
-Port our Qiskit QFT of |001> in my_code.py to CUDA-Q as qft_cudaq.py, using
-@cudaq-doc.md as your reference: ~25 flat lines, no notebook.
+Port the Qiskit Grover search in my_code.py to CUDA-Q as grover_cudaq.py, using
+@cudaq-doc.md as your reference.
 
-Target "nvidia"; one @cudaq.kernel, one cudaq.qvector(3) (a second kernel adds 3
-more qubits): x(q[0]); for target in range(2,-1,-1), h(q[target]) then
-r1.ctrl(pi/2**(target-control), q[control], q[target]) per lower control;
-swap(q[0],q[2]).
+Three qubits start in equal superposition, then two Grover rounds concentrate them
+onto the marked state |111>: each round flips that state's phase with a
+controlled-controlled-Z, then reflects the amplitudes about their average with the
+usual Hadamard, X, CCZ, X, Hadamard diffuser.
 
-Index state = np.array(cudaq.get_state(qft)) over range(8) (iterating hangs), print
-f"|{i:03b}>: {np.round(state[i],3)+0j:.3f}". Run it, then confirm all eight
-amplitudes match my_code.py.
+Keep the whole circuit in a single kernel. Turn the final state into an array with
+to_numpy(), then print the probability of |111> the way my_code.py does.
 ```
 
 Bring your own script and swap it in — the recipe is the same: point the agent at your code

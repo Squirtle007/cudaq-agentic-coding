@@ -1,46 +1,35 @@
-"""A simple Quantum Fourier Transform (QFT) implementation in Qiskit.
+"""A simple Grover search implementation in Qiskit.
 
-The QFT converts computational-basis states into Fourier-basis states.
+Grover's algorithm finds a marked item in an unstructured set.
 
 Circuit structure:
-  1. Process target qubits from highest to lowest index.
-  2. Apply a Hadamard gate to each target qubit.
-  3. Apply controlled phase rotations from each lower-index control qubit,
-     using the angle pi / 2^(target - control).
-  4. Swap the qubits to reverse their order.
+  1. Put every qubit into superposition with a Hadamard gate.
+  2. Repeat twice: an oracle that flips the phase of |111>, then a diffuser
+     that reflects every amplitude about their average.
+  3. Two iterations to amplify the probability of |111>.
 """
 
-from math import pi
-
-import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import Statevector
 
 num_qubits = 3
+iterations = 2
 
-# Prepare |001>, then apply the QFT.
 circuit = QuantumCircuit(num_qubits)
-circuit.x(0)
+circuit.h(range(num_qubits))
 
-for target in range(num_qubits - 1, -1, -1):
-    circuit.h(target)
+for _ in range(iterations):
+    # Oracle: a controlled-controlled-Z flips the phase of |111>.
+    circuit.ccz(0, 1, 2)
 
-    for control in range(target - 1, -1, -1):
-        angle = pi / 2 ** (target - control)
-        circuit.cp(angle, control, target)
+    # Diffuser: reflect the amplitudes about their average.
+    circuit.h(range(num_qubits))
+    circuit.x(range(num_qubits))
+    circuit.ccz(0, 1, 2)
+    circuit.x(range(num_qubits))
+    circuit.h(range(num_qubits))
 
-# Reverse the qubit order.
-for qubit in range(num_qubits // 2):
-    circuit.swap(qubit, num_qubits - qubit - 1)
+probabilities = Statevector(circuit).probabilities()
 
-print(circuit.draw())
-
-print("\nQFT of |001>:")
-state = Statevector(circuit)
-
-for index in range(2**num_qubits):
-    # Round to 3 decimals; the + 0j turns a stray "-0.000" back into "0.000".
-    amplitude = np.round(state[index], 3) + 0j
-
-    label = format(index, f"0{num_qubits}b")
-    print(f"|{label}>: {amplitude:.3f}")
+# The probability of |111> state.
+print(f"|{int(2**num_qubits-1):03b}>: {probabilities[int(2**num_qubits-1)]:.3f}")
