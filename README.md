@@ -146,7 +146,7 @@ This is the core session of the bootcamp: a self-contained, natural-language pro
 
 Along the way, you scale from a 16-qubit exact state-vector simulation to 36-qubit tensor-network and matrix product state simulation with CUDA-Q’s built-in optimization techniques, advancing quantum simulation at scale.
 
-![](images/learning_path.png)
+![](assets/learning_path.png)
 
 | Notebook | Optimizer | Backend | The improvement it teaches |
 |---|---|---|---|
@@ -163,6 +163,8 @@ Other ingredients:
 | `AGENTS.md` | conventions that every agent-built notebook follows to ensure reproducibility |
 | `helpers.py` | shared useful functions: map visualization, QUBO building, decoding/validation, etc. |
 | `data/taiwan_map_xy.json` | simplified schematic of Taiwan's 19 main-island counties |
+| `assets/quick_guide.pdf` | printable quick-start walkthrough of the bootcamp |
+| `assets/nim_api_key_setup.pdf` | step-by-step for getting your NVIDIA NIM API key |
 
 <br>
 
