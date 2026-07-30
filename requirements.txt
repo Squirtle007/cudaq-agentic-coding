@@ -1,7 +1,8 @@
-# cudaq itself is preinstalled (source build) — not listed here
-numpy
-scipy
-matplotlib
-networkx
-jupyter
-requests
+# cudaq itself is preinstalled (source build) — not listed here.
+# Versions pinned to the tested image: Python 3.12, CUDA-Q 0.15.0.
+numpy==2.5.0
+scipy==1.18.0
+matplotlib==3.11.0
+networkx==3.6.1
+requests==2.34.2
+jupyterlab==4.5.7
