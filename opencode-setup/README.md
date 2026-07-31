@@ -3,7 +3,8 @@
 > The instructions below are for post-bootcamp setup - OpenCode is preinstalled for the bootcamp, so no installation is needed.
 
 Get [**OpenCode**](https://opencode.ai/docs/) — an open-source coding agent that runs in your
-terminal — working with **NVIDIA Nemotron 3 Ultra** in about five minutes.
+terminal — working with **NVIDIA Nemotron 3 Ultra** in about five minutes. The main path uses
+NVIDIA hosted NIM; an additional tested config is included for NCHC RAP users.
 
 This folder is self-contained. It sets up the agent itself, not any particular project, so
 once you finish you can point OpenCode at whatever you like.
@@ -81,21 +82,20 @@ Global config applies in every folder you work in. See
 
 ---
 
-## 4. Paste your key into it
+## 4. Set your key as an environment variable
 
-Open the copied file and replace the placeholder with the key from step 2:
+Keep the credential out of the JSON file. Export it in the same terminal where you will
+start OpenCode:
 
 ```bash
-nano ~/.config/opencode/opencode.json     # or vim, code, gedit — any editor
+export NVIDIA_API_KEY="YOUR_NVIDIA_API_KEY"
 ```
 
-```jsonc
-"apiKey": "nvapi-PASTE-YOUR-KEY-HERE"     // ← replace this line's value with your key
-```
+Use your complete key, including its required prefix, but do not add `Bearer `. OpenCode
+supports `{env:VARIABLE_NAME}` substitution, so the checked-in config reads the value at
+startup without storing it in Git.
 
-It should end up looking like `"apiKey": "nvapi-xxxxxxxxxxxxxxxx"`. Must keep the prefix: `nvapi-`, but don't add a `Bearer `.
-
-Here is the whole file for reference, with the one line you edit marked:
+Here is the relevant part of the installed config:
 
 ```jsonc
 {
@@ -107,7 +107,7 @@ Here is the whole file for reference, with the one line you edit marked:
       "name": "NVIDIA NIM",
       "options": {
         "baseURL": "https://integrate.api.nvidia.com/v1",
-        "apiKey": "nvapi-PASTE-YOUR-KEY-HERE"        // ← your key goes here!
+        "apiKey": "{env:NVIDIA_API_KEY}"
       },
       "models": {
         "nemotron-3-ultra-550b-a55b": {
@@ -120,6 +120,9 @@ Here is the whole file for reference, with the one line you edit marked:
   }
 }
 ```
+
+The export lasts for the current terminal session. Add it to a secure shell startup or
+environment-management mechanism if you need it across restarts; never commit the value.
 
 ---
 
@@ -150,6 +153,28 @@ opencode run "hello opencode"
 > ```bash
 > curl -s https://integrate.api.nvidia.com/v1/models | grep -o '"id":"[^"]*"'
 > ```
+
+### NCHC RAP alternative
+
+NCHC RAP users can use the included `opencode.nchc-rap.json` instead. It registers both
+Nemotron 3 models under one provider:
+
+- `NVIDIA-Nemotron-3-Super-120B-A12B` — default
+- `NVIDIA-Nemotron-3-Ultra-550B-A55B` — selectable fallback
+
+The two models share one RAP API key. Obtain the key from NCHC RAP or your course organizer,
+then install the alternative config and export the key in the terminal where OpenCode runs:
+
+```bash
+cp opencode.nchc-rap.json ~/.config/opencode/opencode.json
+export RAP_NEMOTRON_3_ULTRA_API_KEY="YOUR_RAP_API_KEY"
+opencode models rap-nemotron
+opencode
+```
+
+Use `/models` inside OpenCode to switch between Super and Ultra. The example sends the same
+environment variable as both the OpenAI-compatible `apiKey` and `x-api-key` header required
+by the RAP endpoint; the key value is never stored in the tracked JSON file.
 
 ---
 
@@ -202,7 +227,7 @@ CUDA-Q question — the agent picks the skill up on its own.
 | Symptom | Fix |
 |---|---|
 | `opencode: command not found` | Binary is in `~/.opencode/bin` — reopen the terminal, or `export PATH="$HOME/.opencode/bin:$PATH"` |
-| `401` / `403` / "invalid API key" | The placeholder is probably still in place. Check `grep apiKey ~/.config/opencode/opencode.json` — if it still says `PASTE-YOUR-KEY-HERE`, redo step 4. Paste the bare token, no `Bearer ` prefix. |
+| `401` / `403` / "invalid API key" | Confirm the matching environment variable is set in the terminal that launched OpenCode: `NVIDIA_API_KEY` for NIM or `RAP_NEMOTRON_3_ULTRA_API_KEY` for NCHC RAP. Use the bare token, with no `Bearer ` prefix. |
 | `404` / "model not found" | The model name drifted. Run the `curl` in step 5 and copy the exact string into `id`. |
 | Config seems ignored | A project-level `opencode.json` in your current folder overrides the global one. Check for it. |
 | Changes to `opencode.json` do nothing | Either you edited the copy in this folder instead of the installed one — redo step 3 — or `opencode` is still running. Restart it; config is read at startup. |
