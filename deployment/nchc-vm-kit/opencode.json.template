@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "share": "disabled",
+  "permission": {
+    "read": "allow",
+    "grep": "allow",
+    "glob": "allow",
+    "bash": "ask",
+    "edit": "ask",
+    "webfetch": "ask",
+    "websearch": "ask",
+    "jupyter_*": "ask"
+  },
+  "provider": "__GENERATED_BY_RENDER_OPENCODE_CONFIG__"
+}
