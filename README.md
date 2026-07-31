@@ -17,8 +17,8 @@ Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/l
 ### NCHC classroom VM
 
 The tested H200 VM deployment kit, bilingual student guides, validation scripts, and image
-handoff runbook live in [`nchc-vm-deployment/`](nchc-vm-deployment/). Students start
-with the [student guide](nchc-vm-deployment/student-guide.en.md).
+handoff runbook live in [`nchc-vm-deployment/`](nchc-vm-deployment/README.md). Students can
+start directly with the [student guide](nchc-vm-deployment/student-guide.en.md).
 Runtime files and completed credential files are intentionally excluded from Git.
 
 ## How the bootcamp works
