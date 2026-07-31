@@ -3,12 +3,13 @@
 > The instructions below are for post-bootcamp setup - OpenCode is preinstalled for the bootcamp, so no installation is needed.
 
 Get [**OpenCode**](https://opencode.ai/docs/) — an open-source coding agent that runs in your
-terminal — working with **NVIDIA Nemotron 3 Ultra** in about five minutes.
+terminal — working with **NCHC RAP Nemotron 3** in about five minutes. Nemotron 3 Super is
+the default; Nemotron 3 Ultra is available in the same config and selectable mid-session.
 
 This folder is self-contained. It sets up the agent itself, not any particular project, so
 once you finish you can point OpenCode at whatever you like.
 
-**You need:** a terminal on Linux, macOS, or Windows/WSL2 · `curl` · a free account at [**NVIDIA Inference Microservices (NIM)**](https://build.nvidia.com).
+**You need:** a terminal on Linux, macOS, or Windows/WSL2 · `curl` · an API key for [**NCHC RAP**](https://portal.genai.nchc.org.tw) from the portal or your course organizer.
 
 ---
 
@@ -48,14 +49,12 @@ opencode --version
 
 ---
 
-## 2. Get your NVIDIA API key
+## 2. Get your NCHC RAP API key
 
-Open the
-[Nemotron 3 Ultra model page](https://build.nvidia.com/nvidia/nemotron-3-ultra-550b-a55b),
-sign in, and click **Get API Key**. Copy the token — it starts with `nvapi-`.
+Sign in to the [NCHC RAP portal](https://portal.genai.nchc.org.tw) and issue an API key, or
+ask your course organizer for the one provided for your event.
 
-The same key works for every model in the
-[NVIDIA API catalog](https://build.nvidia.com/models), so you only do this once.
+One key serves both Nemotron 3 Super and Nemotron 3 Ultra, so you only do this once.
 
 ---
 
@@ -81,40 +80,45 @@ Global config applies in every folder you work in. See
 
 ---
 
-## 4. Paste your key into it
+## 4. Set your key as an environment variable
 
-Open the copied file and replace the placeholder with the key from step 2:
+The key stays out of the config file. Export it in the same terminal you'll start OpenCode
+from, using the key from step 2:
 
 ```bash
-nano ~/.config/opencode/opencode.json     # or vim, code, gedit — any editor
+export RAP_API_KEY="YOUR_RAP_API_KEY"
 ```
 
-```jsonc
-"apiKey": "nvapi-PASTE-YOUR-KEY-HERE"     // ← replace this line's value with your key
-```
+Use the complete key exactly as issued — don't add a `Bearer ` prefix. The config reads
+`{env:RAP_API_KEY}` at startup, so nothing secret is ever written to disk.
 
-It should end up looking like `"apiKey": "nvapi-xxxxxxxxxxxxxxxx"`. Must keep the prefix: `nvapi-`, but don't add a `Bearer `.
+The export only lasts for the current terminal session. If you want it to survive a restart,
+add it to your shell startup file or whatever secret manager you already use — but never
+commit it.
 
-Here is the whole file for reference, with the one line you edit marked:
+Here is the whole file for reference. The RAP endpoint wants the key in two places, and both
+read the same variable, so the one export above covers them:
 
 ```jsonc
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "nvidia/nemotron-3-ultra-550b-a55b",
+  "model": "rap-nemotron/NVIDIA-Nemotron-3-Super-120B-A12B",
+  "small_model": "rap-nemotron/NVIDIA-Nemotron-3-Super-120B-A12B",
+  "share": "disabled",
   "provider": {
-    "nvidia": {
+    "rap-nemotron": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "NVIDIA NIM",
+      "name": "NCHC RAP Nemotron 3",
       "options": {
-        "baseURL": "https://integrate.api.nvidia.com/v1",
-        "apiKey": "nvapi-PASTE-YOUR-KEY-HERE"        // ← your key goes here!
+        "baseURL": "https://portal.genai.nchc.org.tw/api/v1",
+        "apiKey": "{env:RAP_API_KEY}",                 // ← your key is read from here
+        "headers": {
+          "x-api-key": "{env:RAP_API_KEY}"             // ← and here — same variable
+        }
       },
       "models": {
-        "nemotron-3-ultra-550b-a55b": {
-          "id": "nvidia/nemotron-3-ultra-550b-a55b",
-          "name": "NVIDIA Nemotron 3 Ultra 550B A55B",
-          "limit": { "context": 1000000, "output": 65536 }
-        }
+        "NVIDIA-Nemotron-3-Super-120B-A12B": { "name": "NCHC RAP Nemotron 3 Super" },
+        "NVIDIA-Nemotron-3-Ultra-550B-A55B": { "name": "NCHC RAP Nemotron 3 Ultra" }
       }
     }
   }
@@ -129,15 +133,11 @@ First confirm the config parses and the model is registered
 ([CLI reference](https://opencode.ai/docs/cli/)):
 
 ```bash
-opencode models nvidia | grep nemotron-3-ultra
+opencode models rap-nemotron
 ```
 
-You should see `nvidia/nemotron-3-ultra-550b-a55b` — that's the one your config uses.
-
-> The unfiltered `opencode models nvidia` prints ~100 entries, because OpenCode also
-> auto-discovers NVIDIA's whole catalog. You'll spot a near-duplicate
-> `nvidia/nvidia/nemotron-3-ultra-550b-a55b` in there; that's the auto-discovered form.
-> Either works — the single-prefix one is what this config defines.
+You should see both models listed — Super and Ultra. Super is the one your config uses by
+default.
 
 Then make a real call:
 
@@ -145,10 +145,11 @@ Then make a real call:
 opencode run "hello opencode"
 ```
 
-> If the model name is ever rejected, ask the API which names it currently serves and copy
-> the exact string into the `id` field:
+> If a model name is ever rejected, ask the API which names it currently serves and copy the
+> exact string into `models`:
 > ```bash
-> curl -s https://integrate.api.nvidia.com/v1/models | grep -o '"id":"[^"]*"'
+> curl -s -H "x-api-key: $RAP_API_KEY" \
+>   https://portal.genai.nchc.org.tw/api/v1/models | grep -o '"id":"[^"]*"'
 > ```
 
 ---
@@ -202,10 +203,10 @@ CUDA-Q question — the agent picks the skill up on its own.
 | Symptom | Fix |
 |---|---|
 | `opencode: command not found` | Binary is in `~/.opencode/bin` — reopen the terminal, or `export PATH="$HOME/.opencode/bin:$PATH"` |
-| `401` / `403` / "invalid API key" | The placeholder is probably still in place. Check `grep apiKey ~/.config/opencode/opencode.json` — if it still says `PASTE-YOUR-KEY-HERE`, redo step 4. Paste the bare token, no `Bearer ` prefix. |
-| `404` / "model not found" | The model name drifted. Run the `curl` in step 5 and copy the exact string into `id`. |
+| `401` / `403` / "invalid API key" | `RAP_API_KEY` probably isn't set in the terminal that launched OpenCode. Check with `[ -n "$RAP_API_KEY" ] && echo SET || echo UNSET` in that same terminal — that tests it without printing it — and redo step 4 if needed. Use the bare token, no `Bearer ` prefix. |
+| `404` / "model not found" | The model name drifted. Run the `curl` in step 5 and copy the exact string into `models`. |
 | Config seems ignored | A project-level `opencode.json` in your current folder overrides the global one. Check for it. |
 | Changes to `opencode.json` do nothing | Either you edited the copy in this folder instead of the installed one — redo step 3 — or `opencode` is still running. Restart it; config is read at startup. |
-| "Unexpected token" / config won't load | A stray comma or missing quote from step 4. Validate with `python3 -m json.tool ~/.config/opencode/opencode.json` |
+| "Unexpected token" / config won't load | The copied file got mangled — a stray comma or missing quote. Validate with `python3 -m json.tool ~/.config/opencode/opencode.json`, then redo step 3 from a clean copy. |
 | Slow or truncated replies | Expected on a 550B model for long inputs. Narrow the request and try again. |
 | The model stops responding | Type `/models` in the session to list what's available and switch to another one. |
