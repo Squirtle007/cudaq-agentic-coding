@@ -173,7 +173,6 @@ Other ingredients:
 | `helpers.py` | shared useful functions: map visualization, QUBO building, decoding/validation, etc. |
 | `data/taiwan_map_xy.json` | simplified schematic of Taiwan's 19 main-island counties |
 | `assets/quick_guide.png` | the quick-start map of the bootcamp shown at the top of this page |
-| `assets/nim_api_key_setup.pdf` | step-by-step for getting your NVIDIA NIM API key |
 | `nchc-vm-deployment/` | NCHC H200 classroom VM deployment, validation, reset, and image-handoff kit |
 
 <br>
