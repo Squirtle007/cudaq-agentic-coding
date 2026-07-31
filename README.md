@@ -14,6 +14,13 @@ pip install -r requirements.txt
 Tested with Python 3.12, CUDA-Q 0.15.0 (pre-built from a [CUDA-Q container on NGC](https://catalog.ngc.nvidia.com/orgs/nvidia/quantum/containers/cuda-quantum)). One NVIDIA GPU is required.
 Follow the detailed [installation guide](https://nvidia.github.io/cuda-quantum/latest/using/quick_start.html) and the system [prerequisites](https://nvidia.github.io/cuda-quantum/latest/using/install/local_installation.html#dependencies-and-compatibility).
 
+### NCHC classroom VM
+
+The tested H200 VM deployment kit, bilingual student guides, validation scripts, and image
+handoff runbook live in [`nchc-vm-deployment/`](nchc-vm-deployment/). Students start
+with the [student guide](nchc-vm-deployment/student-guide.en.md).
+Runtime files and completed credential files are intentionally excluded from Git.
+
 ## How the bootcamp works
 
 1. **Warm-up 0:** run `_intro_cudaq.ipynb` yourself, top to bottom, to learn CUDA-Q hands-on.
@@ -167,6 +174,7 @@ Other ingredients:
 | `data/taiwan_map_xy.json` | simplified schematic of Taiwan's 19 main-island counties |
 | `assets/quick_guide.png` | the quick-start map of the bootcamp shown at the top of this page |
 | `assets/nim_api_key_setup.pdf` | step-by-step for getting your NVIDIA NIM API key |
+| `nchc-vm-deployment/` | NCHC H200 classroom VM deployment, validation, reset, and image-handoff kit |
 
 <br>
 

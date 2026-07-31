@@ -1,0 +1,24 @@
+--- a/README.md
++++ b/README.md
+@@ -4,6 +4,10 @@
+
+ ## Setup
+
++For the NCHC classroom VM, the environment, repository, OpenCode, and CUDA-Q are
++preloaded. Follow the Traditional Chinese student guide in the VM kit; do not reinstall
++CUDA-Q, Docker, or Python packages during class. For a separate local installation, use:
++
+ Clone this repository, navigate to the tutorial directory, and install the required libraries from your terminal:
+ ```
+ pip install -r requirements.txt
+--- a/requirements.txt
++++ b/requirements.txt
+@@ -5,4 +5,7 @@
+ matplotlib==3.11.0
+ networkx==3.6.1
+ requests==2.34.2
+-jupyterlab==4.5.7
++jupyterlab==4.6.1
++notebook==7.6.0
++jupyter-ai==3.0.1
++qiskit==2.5.0
