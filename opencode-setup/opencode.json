@@ -7,7 +7,7 @@
       "name": "NVIDIA NIM",
       "options": {
         "baseURL": "https://integrate.api.nvidia.com/v1",
-        "apiKey": "nvapi-PASTE-YOUR-KEY-HERE"
+        "apiKey": "{env:NVIDIA_API_KEY}"
       },
       "models": {
         "nemotron-3-ultra-550b-a55b": {

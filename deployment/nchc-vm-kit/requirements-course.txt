@@ -1,0 +1,11 @@
+# CUDA-Q 0.15.0 is already installed in the NVIDIA CUDA-Q base image.
+# These are the course-level direct dependencies. The validated container image,
+# image digest, and /opt/nchc-cudaq-course/resolved-requirements.txt are the lock.
+numpy
+scipy
+matplotlib
+networkx
+jupyterlab==4.6.1
+notebook==7.6.0
+jupyter-ai==3.0.1
+qiskit==2.5.0

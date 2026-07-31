@@ -1,0 +1,11 @@
+.env
+.runtime/
+*.log
+course-backups/
+
+course.env*
+activity-keys.env
+opencode.json
+*.pem
+*.key
+*.zip

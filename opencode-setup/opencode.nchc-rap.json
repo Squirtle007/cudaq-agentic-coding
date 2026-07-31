@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "rap-nemotron/NVIDIA-Nemotron-3-Super-120B-A12B",
+  "small_model": "rap-nemotron/NVIDIA-Nemotron-3-Super-120B-A12B",
+  "share": "disabled",
+  "provider": {
+    "rap-nemotron": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "NCHC RAP Nemotron 3",
+      "options": {
+        "baseURL": "https://portal.genai.nchc.org.tw/api/v1",
+        "apiKey": "{env:RAP_NEMOTRON_3_ULTRA_API_KEY}",
+        "headers": {
+          "x-api-key": "{env:RAP_NEMOTRON_3_ULTRA_API_KEY}"
+        }
+      },
+      "models": {
+        "NVIDIA-Nemotron-3-Super-120B-A12B": {
+          "name": "NCHC RAP Nemotron 3 Super"
+        },
+        "NVIDIA-Nemotron-3-Ultra-550B-A55B": {
+          "name": "NCHC RAP Nemotron 3 Ultra"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,57 @@
+services:
+  lab:
+    image: ${COURSE_IMAGE:-nchc/cudaq-agentic-coding:2026-07-17}
+    gpus: all
+    init: true
+    restart: unless-stopped
+    working_dir: /workspace/cudaq-agentic-coding
+    ports:
+      - "${JUPYTER_BIND_ADDRESS:-0.0.0.0}:${JUPYTER_PORT:-8888}:8888"
+    environment:
+      HOME: /home/cudaq
+      PYTHONUNBUFFERED: "1"
+      NCHC_RAP_BASE_URL: ${NCHC_RAP_BASE_URL:-}
+      RAP_NEMOTRON_3_ULTRA_API_KEY: ${RAP_NEMOTRON_3_ULTRA_API_KEY:-}
+      RAP_NENOTRON_3_ULTRA_API_KEY: ${RAP_NENOTRON_3_ULTRA_API_KEY:-}
+      RAP_GEMMA_26B_API_KEY: ${RAP_GEMMA_26B_API_KEY:-}
+      RAP_GEMMA_31B_API_KEY: ${RAP_GEMMA_31B_API_KEY:-}
+      NVIDIA_NIM_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+      NVIDIA_API_KEY: ${NVIDIA_NIM_API_KEY:-}
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:?JUPYTER_TOKEN must be set in the course env file}
+    volumes:
+      - type: bind
+        source: ${COURSE_REPO_PATH:?COURSE_REPO_PATH must be set}
+        target: /workspace/cudaq-agentic-coding
+      - type: bind
+        source: ${RUNTIME_DIR:?RUNTIME_DIR is set by start-lab.sh}/opencode.json
+        target: /workspace/cudaq-agentic-coding/opencode.json
+        read_only: true
+      - type: bind
+        source: ${RUNTIME_DIR:?RUNTIME_DIR is set by start-lab.sh}/jupyter
+        target: /home/cudaq/.jupyter
+      - type: bind
+        source: ${RUNTIME_DIR:?RUNTIME_DIR is set by start-lab.sh}/opencode-data
+        target: /home/cudaq/.local/share/opencode
+      - type: bind
+        source: ${RUNTIME_DIR:?RUNTIME_DIR is set by start-lab.sh}/opencode-cache
+        target: /home/cudaq/.cache/opencode
+      - type: bind
+        source: ${RUNTIME_DIR:?RUNTIME_DIR is set by start-lab.sh}/opencode-skills
+        target: /home/cudaq/.config/opencode/skills
+    command:
+      - bash
+      - -lc
+      - >-
+        jupyter lab
+        --no-browser
+        --ip=0.0.0.0
+        --port=8888
+        --ServerApp.root_dir=/workspace/cudaq-agentic-coding
+        --ServerApp.allow_remote_access=true
+        --IdentityProvider.token="$${JUPYTER_TOKEN}"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://127.0.0.1:8888/api/status?token='\"$${JUPYTER_TOKEN}\" >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
