@@ -59,13 +59,6 @@ sudo ./finalize-vm-image.sh
 - NCHC RAP `rap-nemotron` 同時提供 Nemotron 3 Super 與 Ultra，兩者共用同一把 RAP key；課程預設為 Super。
 - OpenCode Zen 的 `opencode/nemotron-3-ultra-free` 作為 RAP 變慢時的限時免費 fallback；它是內建 provider，學生必須以自己的 Zen API key 執行 `/connect`，不得將 Zen key 封裝進 VM 或課程 env。
 
-## 課程 repo 已確認的修正
-
-- 正式教材一律鎖定 GitHub `main` 的明確 commit，並在 `NCHC_SOURCE_REVISION` 記錄 commit 與 archive SHA-256。
-- 新版規則檔是 `AGENTS.md`，舊 `tutorial-guide.md` 名稱不再使用。
-- `my_code.py` 使用 Qiskit，但原始 `requirements.txt` 未包含 Qiskit；課程 image 已補裝 `qiskit==2.5.0`。
-- 公開 `main` 不含 `solutions/`；學生的新 Notebook 建立在 repo 根目錄，答案分支不得掛載給 Agent。
-
 ## 檔案用途
 
 | 檔案 | 用途 |
