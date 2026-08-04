@@ -38,7 +38,7 @@ NCHC will prepare about 40 VMs. Each student will receive:
 - An assigned VM IP address
 - The fixed login account `ubuntu`
 
-The examples below use `140.110.109.117`. Replace it with the IP address assigned by the instructor. Do not sign in to another student's VM.
+The examples below use `140.110.109.XXX`. Replace it with the IP address assigned by the instructor. Do not sign in to another student's VM.
 
 ### macOS
 
@@ -52,7 +52,7 @@ chmod 600 ~/Downloads/bootcamp0807.pem
 3. Sign in to the assigned VM:
 
 ```bash
-ssh -p 3322 -i ~/Downloads/bootcamp0807.pem ubuntu@140.110.109.117
+ssh -p 3322 -i ~/Downloads/bootcamp0807.pem ubuntu@140.110.109.XXX
 ```
 
 ### Windows 10/11 PowerShell
@@ -60,7 +60,7 @@ ssh -p 3322 -i ~/Downloads/bootcamp0807.pem ubuntu@140.110.109.117
 Windows 10/11 normally includes the OpenSSH Client. Open PowerShell:
 
 ```powershell
-ssh -p 3322 -i "$HOME\Downloads\bootcamp0807.pem" ubuntu@140.110.109.117
+ssh -p 3322 -i "$HOME\Downloads\bootcamp0807.pem" ubuntu@140.110.109.XXX
 ```
 
 If you see `ssh is not recognized`, go to:
@@ -131,14 +131,14 @@ docker compose \
 
 The service status should become `healthy`. If it is still `starting`, wait about 10–30 seconds and check again.
 
-`PORTS` showing `0.0.0.0:8888->8888/tcp` is correct. `0.0.0.0` is the address Docker listens on inside the VM. The NCHC floating/public IP, such as `140.110.109.117`, is an external NAT mapping and will not appear in `docker compose ps`.
+`PORTS` showing `0.0.0.0:8888->8888/tcp` is correct. `0.0.0.0` is the address Docker listens on inside the VM. The NCHC floating/public IP, such as `140.110.109.XXX`, is an external NAT mapping and will not appear in `docker compose ps`.
 
 ## Step 4: Open JupyterLab directly from your laptop
 
 `start-lab.sh` prints the complete login link for this VM. If `JUPYTER_PUBLIC_HOST` is not set, the script cross-checks the public IP through two independent HTTPS sources. It uses the result only when both sources return the same valid IPv4 address, so there is no need to configure all 40 VMs individually. If detection fails, the script falls back to a local IP and displays a warning.
 
 ```text
-http://140.110.109.117:8888/lab?token=THIS-VM-UNIQUE-TOKEN
+http://140.110.109.XXX:8888/lab?token=THIS-VM-UNIQUE-TOKEN
 ```
 
 Click or copy the link on your laptop. You do not need to enter the token separately. If the detected IP differs from the one assigned by the instructor, replace only the IP in the URL and keep the rest unchanged. TCP port 8888 must be allowed by the NCHC network rules for course participants. The complete URL contains a token; do not share it, take a screenshot of it, or paste it into chat.
@@ -151,13 +151,13 @@ macOS Terminal:
 
 ```bash
 ssh -p 3322 -i ~/Downloads/bootcamp0807.pem -N \
-  -L 8888:127.0.0.1:8888 ubuntu@140.110.109.117
+  -L 8888:127.0.0.1:8888 ubuntu@140.110.109.XXX
 ```
 
 Windows PowerShell:
 
 ```powershell
-ssh -p 3322 -i "$HOME\Downloads\bootcamp0807.pem" -N -L 8888:127.0.0.1:8888 ubuntu@140.110.109.117
+ssh -p 3322 -i "$HOME\Downloads\bootcamp0807.pem" -N -L 8888:127.0.0.1:8888 ubuntu@140.110.109.XXX
 ```
 
 It is normal for the tunnel command to display no output. Keep the window open, then use the complete localhost login link printed by `start-lab.sh`.

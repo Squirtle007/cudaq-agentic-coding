@@ -5,7 +5,7 @@
 預計由國網準備約 40 台學生 VM。每位學生取得一個指定 IP，並以活動用 `bootcamp0807.pem` 登入，例如：
 
 ```bash
-ssh -p 3322 -i bootcamp0807.pem ubuntu@140.110.109.117
+ssh -p 3322 -i bootcamp0807.pem ubuntu@140.110.109.XXX
 ```
 
 ## 最終 VM 內容

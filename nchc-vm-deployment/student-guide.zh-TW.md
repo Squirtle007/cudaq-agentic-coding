@@ -38,7 +38,7 @@ CUDA-Q 課程 container
 - 一個指定的 VM IP
 - 固定登入帳號 `ubuntu`
 
-以下使用 `140.110.109.117` 作為示範；請換成教師分配給你的 IP，不要登入其他同學的 VM。
+以下使用 `140.110.109.XXX` 作為示範；請換成教師分配給你的 IP，不要登入其他同學的 VM。
 
 ### macOS
 
@@ -52,7 +52,7 @@ chmod 600 ~/Downloads/bootcamp0807.pem
 3. 登入指定 VM：
 
 ```bash
-ssh -p 3322 -i ~/Downloads/bootcamp0807.pem ubuntu@140.110.109.117
+ssh -p 3322 -i ~/Downloads/bootcamp0807.pem ubuntu@140.110.109.XXX
 ```
 
 ### Windows 10／11 PowerShell
@@ -60,7 +60,7 @@ ssh -p 3322 -i ~/Downloads/bootcamp0807.pem ubuntu@140.110.109.117
 Windows 10／11 通常已內建 OpenSSH Client。開啟 PowerShell：
 
 ```powershell
-ssh -p 3322 -i "$HOME\Downloads\bootcamp0807.pem" ubuntu@140.110.109.117
+ssh -p 3322 -i "$HOME\Downloads\bootcamp0807.pem" ubuntu@140.110.109.XXX
 ```
 
 如果顯示 `ssh is not recognized`，請至：
@@ -130,7 +130,7 @@ docker compose \
 ```
 
 服務狀態應變成 `healthy`。若尚為 `starting`，等待約 10–30 秒再查一次。
-`PORTS` 顯示 `0.0.0.0:8888->8888/tcp` 是正確結果：`0.0.0.0` 是 Docker 在 VM 本機的監聽位址，NCHC 的 floating/public IP（例如 `140.110.109.117`）屬於外部 NAT 映射，不會出現在 `docker compose ps`。
+`PORTS` 顯示 `0.0.0.0:8888->8888/tcp` 是正確結果：`0.0.0.0` 是 Docker 在 VM 本機的監聽位址，NCHC 的 floating/public IP（例如 `140.110.109.XXX`）屬於外部 NAT 映射，不會出現在 `docker compose ps`。
 
 ## Step 4：從筆電直接開啟 JupyterLab
 
@@ -138,7 +138,7 @@ docker compose \
 若未設定 `JUPYTER_PUBLIC_HOST`，腳本會透過兩個獨立 HTTPS 來源交叉確認這台 VM 的 public IP；只有兩者回傳相同且有效的 IPv4 才採用，因此 40 台 VM 不需逐台填寫。若查詢失敗，才會退回本機 IP 並顯示警告。
 
 ```text
-http://140.110.109.117:8888/lab?token=這台VM的獨立token
+http://140.110.109.XXX:8888/lab?token=這台VM的獨立token
 ```
 
 直接在自己的筆電點擊或複製該連結即可登入，不必再手動輸入 token。若自動偵測的 IP 與教師分配的 VM IP 不同，請將網址中的 IP 換成教師提供的 IP，保留其餘部分。TCP 8888 必須由 NCHC 網路規則開放給課程使用者；完整網址含有 token，不要分享、截圖或貼到聊天。
@@ -151,13 +151,13 @@ macOS Terminal：
 
 ```bash
 ssh -p 3322 -i ~/Downloads/bootcamp0807.pem -N \
-  -L 8888:127.0.0.1:8888 ubuntu@140.110.109.117
+  -L 8888:127.0.0.1:8888 ubuntu@140.110.109.XXX
 ```
 
 Windows PowerShell：
 
 ```powershell
-ssh -p 3322 -i "$HOME\Downloads\bootcamp0807.pem" -N -L 8888:127.0.0.1:8888 ubuntu@140.110.109.117
+ssh -p 3322 -i "$HOME\Downloads\bootcamp0807.pem" -N -L 8888:127.0.0.1:8888 ubuntu@140.110.109.XXX
 ```
 
 Tunnel 執行期間沒有輸出是正常的；保持視窗開啟，再使用 `start-lab.sh` 顯示的 localhost 完整登入連結。
