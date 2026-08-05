@@ -99,3 +99,40 @@ Apply the rules below everywhere unless a prompt overrides one:
 - Before executing, `compile()` every code cell's source to catch syntax errors cheaply.
 - If a cell errors, fix the notebook and rerun the same way until clean; confirm every code
   cell has outputs and zero errors before considering the build done.
+
+## Known failure modes — read before building 01–04
+
+Each rule below replaces a debugging loop that has already consumed a session on this course.
+
+### Expected runtimes — do not mistake "slow" for "broken"
+- For notebooks 02–04 only, the "every loop under 500 s" budget above does **not** apply to the
+  optimization loop: a 36-qubit tensornet optimization legitimately runs longer, and 02 runs before
+  Step 3 turns contraction-path reuse on. Slow here is the problem Step 3 exists to fix, not a bug to
+  debug. Every other budget still stands.
+- **Never lower `--ExecutePreprocessor.timeout` below 550.** A cell killed at exactly the timeout you
+  set is the timeout, not a bug: raise it, do not edit the code. Lowering it to 120 or 300 to "fail
+  faster" manufactures an error that looks like broken physics and has cost hours of edits to
+  already-correct code.
+
+### Writing the notebook file
+- Do not hand-write `.ipynb` JSON. Build it with a short `nbformat` script
+  (`new_notebook` / `new_markdown_cell` / `new_code_cell`) and write the file once. Hand-written JSON
+  breaks on quotes and newlines inside `source`.
+- If `nbconvert` fails in under ~10 seconds, suspect the file, not the physics — check with
+  `python -m json.tool <notebook>.ipynb > /dev/null` before changing any code.
+
+### Keep the notebook out of your context
+- **Never read back a notebook you have executed.** Executed notebooks store every figure as a base64
+  PNG — about 140 KB, roughly 36,000 tokens, per read, and these notebooks always contain a figure.
+  Re-reading and rewriting an executed notebook is what exhausts the context window; the session then
+  dies with a provider `Bad Request` or is silently compacted, losing the build history.
+- To check a result, read `nbconvert`'s stdout/stderr, or have the cell print what you need.
+- To change one cell, edit that cell — never rewrite the whole notebook.
+
+### When sources disagree
+- Where `cudaq-doc.md` and a step prompt disagree on a convention, follow the step prompt and note in
+  markdown which one you used.
+
+### Stop rule
+- If three consecutive `nbconvert` runs fail for the same reason, stop and report: the command you
+  ran, the actual error text, and what you have ruled out. Do not keep editing.
