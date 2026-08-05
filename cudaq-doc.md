@@ -122,7 +122,21 @@ A kernel must be defined in a file that `inspect` can read back — a `.py` modu
 Defining one inside `python3 -c "..."` fails with `RuntimeError: @cudaq.kernel could not retrieve
 source for function '<name>': it is defined in a non-file context (<string>)`. This is a limitation of
 the decorator, not of the backend: when testing a kernel from the shell, write a small `.py` file and
-run that instead of passing the code to `python3 -c`.
+run that instead of passing the code to `python3 -c`. The message names the kernel, so it is easy to
+misread as a problem with the kernel's own code — check how the file was invoked first.
+
+A kernel body is compiled, not interpreted, so it accepts a restricted subset of Python. Three
+restrictions that produce confusing errors:
+
+*   **No unary `+`.** `rx(+math.pi/2, q[0])` fails with `unhandled UnaryOp (offending source ->
+    +math.pi)`. Write `rx(math.pi/2, q[0])`. Unary minus is fine: `rx(-math.pi/2, q[0])` compiles.
+*   **`range` steps must be compile-time constants.** `for s in range(0, n, K)` with `K` a kernel
+    argument fails with `range step value must be a constant`. Iterate over the count and multiply
+    instead — `for i in range(n_groups): base = i * K`.
+*   **Captured host containers must hold numeric types.** Indexing a module-level `list[float]`
+    works, but touching a list of strings raises `Cannot handle conversion of python type
+    <class 'str'> to MLIR type`. Pass sizes in as `int` arguments rather than calling `len()` on a
+    host list of names inside the kernel.
 
 Inputs to kernels are defined by specifying a parameter in the kernel definition along with the appropriate type. The kernel below takes an integer to define a register of N qubits. Important note: type-annotate every kernel argument — CUDA-Q rejects bare parameters.
 
@@ -3440,8 +3454,9 @@ first qubit, then cascade it forward, leaving amplitude `1/m` behind at each ste
 commute on the same pair, so the exponential factorizes exactly into two ZZ-style blocks:
 
 - `XX` part: `h` on both → `cx(a,b)` · `rz(2*beta)` on b · `cx(a,b)` → `h` on both
-- `YY` part: `rx(+math.pi/2)` on both → `cx(a,b)` · `rz(2*beta)` on b · `cx(a,b)` →
-  `rx(-math.pi/2)` on both
+- `YY` part: `rx(math.pi/2)` on both → `cx(a,b)` · `rz(2*beta)` on b · `cx(a,b)` →
+  `rx(-math.pi/2)` on both. Write `math.pi/2`, never `+math.pi/2`: a leading unary `+` is a
+  compile error in a kernel (see "Defining Kernels").
 
 Apply the mixer over a **ring** of each group's qubits (pairs `(k, (k+1) mod m)`); a
 complete graph over the group mixes faster per layer at the cost of more gates.

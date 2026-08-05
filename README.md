@@ -248,7 +248,7 @@ Structure:
    - 00's cost layer: rz for Z terms, cx-rz-cx for ZZ.
    - XY ring mixer over ring pairs (0,1),(1,2),(2,3),(3,0):
      XX: h,h / cx / rz(2*beta) / cx / h,h
-     YY: rx(+math.pi/2),rx(+math.pi/2) / cx / rz(2*beta) / cx / rx(-math.pi/2),rx(-math.pi/2).
+     YY: rx(math.pi/2),rx(math.pi/2) / cx / rz(2*beta) / cx / rx(-math.pi/2),rx(-math.pi/2).
 3. Optimize: Nelder-Mead, max_iterations=5, start [0.1,0.1], timed; print best energy,
    angles, seconds/evaluation (total/5). No energy calls outside these 5.
 4. SHOTS=2000; sample best angles ONLY after optimization; helpers.summarize_samples; THE
