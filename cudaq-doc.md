@@ -118,6 +118,12 @@ def kernel():
     C = cudaq.qvector(5)
 ```
 
+A kernel must be defined in a file that `inspect` can read back — a `.py` module or a notebook cell.
+Defining one inside `python3 -c "..."` fails with `RuntimeError: @cudaq.kernel could not retrieve
+source for function '<name>': it is defined in a non-file context (<string>)`. This is a limitation of
+the decorator, not of the backend: when testing a kernel from the shell, write a small `.py` file and
+run that instead of passing the code to `python3 -c`.
+
 Inputs to kernels are defined by specifying a parameter in the kernel definition along with the appropriate type. The kernel below takes an integer to define a register of N qubits. Important note: type-annotate every kernel argument — CUDA-Q rejects bare parameters.
 
 ```python
@@ -3424,16 +3430,18 @@ first qubit, then cascade it forward, leaving amplitude `1/m` behind at each ste
 - `x` on qubit 0, then for `k = 0 .. m-2`:
   `ry.ctrl(theta[k], q[k], q[k+1])` followed by `x.ctrl(q[k+1], q[k])`
 - **Angles:** `theta[k] = 2 * arccos(1 / sqrt(m - k))`.
-  Example, `m = 4`: `[2*arccos(1/2), 2*arccos(1/sqrt(3)), 2*arccos(1/sqrt(2))]`
-  `≈ [2.0943951, 1.9106332, 1.5707963]`.
+  Example, `m = 4`:
+  `[2*math.acos(1/math.sqrt(4)), 2*math.acos(1/math.sqrt(3)), 2*math.acos(1/math.sqrt(2))]`.
+  Build them on the host with `math` — never paste the rounded decimals into code.
 - **Always validate once** on a small exact simulation: prepare one group and confirm each
   one-hot basis state carries probability `1/m` (and nothing else appears).
 
-**XY mixer** on a pair `(a, b)`: `exp(-i * beta * (X_a X_b + Y_a Y_b) / 2)`. `XX` and `YY`
+**XY mixer** on a pair `(a, b)`: `exp(-i * beta * (X_a X_b + Y_a Y_b))`. `XX` and `YY`
 commute on the same pair, so the exponential factorizes exactly into two ZZ-style blocks:
 
-- `XX` part: `h` on both → `cx(a,b)` · `rz(beta)` on b · `cx(a,b)` → `h` on both
-- `YY` part: `rx(+pi/2)` on both → `cx(a,b)` · `rz(beta)` on b · `cx(a,b)` → `rx(-pi/2)` on both
+- `XX` part: `h` on both → `cx(a,b)` · `rz(2*beta)` on b · `cx(a,b)` → `h` on both
+- `YY` part: `rx(+math.pi/2)` on both → `cx(a,b)` · `rz(2*beta)` on b · `cx(a,b)` →
+  `rx(-math.pi/2)` on both
 
 Apply the mixer over a **ring** of each group's qubits (pairs `(k, (k+1) mod m)`); a
 complete graph over the group mixes faster per layer at the cost of more gates.
@@ -3441,6 +3449,8 @@ complete graph over the group mixes faster per layer at the cost of more gates.
 **Generic kernel** (equal group size `m`; group `g` owns qubits `g*m .. g*m + m - 1`):
 
 ```python
+import math
+
 @cudaq.kernel
 def qaoa_xy(n_groups: int, m: int,
             z_q: list[int],  z_c: list[float],
@@ -3466,12 +3476,12 @@ def qaoa_xy(n_groups: int, m: int,
             for k in range(m):
                 a = base + k
                 b = base + (k + 1) % m               # arithmetic wrap — see Section 4
-                h(q[a]); h(q[b])                     # XX(beta/2)
-                x.ctrl(q[a], q[b]); rz(betas[layer], q[b]); x.ctrl(q[a], q[b])
+                h(q[a]); h(q[b])                     # XX(beta)
+                x.ctrl(q[a], q[b]); rz(2.0 * betas[layer], q[b]); x.ctrl(q[a], q[b])
                 h(q[a]); h(q[b])
-                rx(1.5707963, q[a]); rx(1.5707963, q[b])    # YY(beta/2)
-                x.ctrl(q[a], q[b]); rz(betas[layer], q[b]); x.ctrl(q[a], q[b])
-                rx(-1.5707963, q[a]); rx(-1.5707963, q[b])
+                rx(math.pi / 2, q[a]); rx(math.pi / 2, q[b])      # YY(beta)
+                x.ctrl(q[a], q[b]); rz(2.0 * betas[layer], q[b]); x.ctrl(q[a], q[b])
+                rx(-math.pi / 2, q[a]); rx(-math.pi / 2, q[b])
 ```
 
 The host-side loop is identical to vanilla (swap the kernel and add `w_angles`).
@@ -4625,6 +4635,13 @@ Compute the expected value of the `spin_operator` with respect to the `kernel`. 
 
 **Returns:**
 A data-type containing the expectation value of the `spin_operator` with respect to the `kernel(*arguments)`, or a list of such results in the case of `observe` function broadcasting. If `shots_count` was provided, the `ObserveResult` will also contain a `SampleResult` dictionary.
+
+> **The kernel must contain no measurements.** A kernel with `mz`/`mx`/`my` in it is rejected:
+> `RuntimeError: observe specification violated for '<kernel>': kernels passed to observe cannot
+> have measurements specified.` Note `cudaq.sample` is indifferent — it measures implicitly and
+> returns the same distribution with or without a trailing `mz` — so one measurement-free kernel
+> serves both: pass it to `observe` for expectation values and to `sample` for bitstrings. Write
+> the `mz` only in a kernel you never pass to `observe`.
 
 **Return type:** `ObserveResult`
 
@@ -6109,6 +6126,11 @@ Constrains the search space by specifying maximum allowed values for each parame
 Maximum number of optimizer iterations (default: unlimited).
 
 Sets an upper bound on the number of function evaluations or iterations the optimizer will perform. If not set, the optimizer may run until convergence or until another stopping criterion is met.
+
+For the derivative-free optimizers (`NelderMead`, `COBYLA`) this is the count of **objective-function
+calls**: `max_iterations = N` invokes the objective exactly `N` times, so `total_time / N` is the
+per-evaluation cost. A small budget is spent, not converged — `NelderMead` with `max_iterations = 5`
+on 2 parameters may still return the starting point.
 
 **Type:** int
 
