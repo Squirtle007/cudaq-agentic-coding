@@ -125,7 +125,7 @@ the decorator, not of the backend: when testing a kernel from the shell, write a
 run that instead of passing the code to `python3 -c`. The message names the kernel, so it is easy to
 misread as a problem with the kernel's own code — check how the file was invoked first.
 
-A kernel body is compiled, not interpreted, so it accepts a restricted subset of Python. Three
+A kernel body is compiled, not interpreted, so it accepts a restricted subset of Python. Four
 restrictions that produce confusing errors:
 
 *   **No unary `+`.** `rx(+math.pi/2, q[0])` fails with `unhandled UnaryOp (offending source ->
@@ -137,6 +137,10 @@ restrictions that produce confusing errors:
     works, but touching a list of strings raises `Cannot handle conversion of python type
     <class 'str'> to MLIR type`. Pass sizes in as `int` arguments rather than calling `len()` on a
     host list of names inside the kernel.
+*   **No math function calls.** `math.pi` is a constant and compiles fine, but `math.acos(...)`,
+    `math.sqrt(...)` and friends fail with `unknown function call`. Compute derived angles on the host
+    and pass them in as `list[float]` — this is why `qaoa_xy` takes a `w_angles: list[float]`
+    parameter instead of building the angles in its body.
 
 Inputs to kernels are defined by specifying a parameter in the kernel definition along with the appropriate type. The kernel below takes an integer to define a register of N qubits. Important note: type-annotate every kernel argument — CUDA-Q rejects bare parameters.
 
