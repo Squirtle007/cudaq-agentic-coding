@@ -133,9 +133,50 @@ Each rule below replaces a debugging loop that has already consumed a session on
   00/01, where one evaluation is milliseconds and no cap applies.
 
 ### Writing the notebook file
-- Do not hand-write `.ipynb` JSON. Build it with a short `nbformat` script
-  (`new_notebook` / `new_markdown_cell` / `new_code_cell`) and write the file once. Hand-written JSON
-  breaks on quotes and newlines inside `source`.
+
+**The build recipe.** One generator per notebook, numbered to match: `build_01.py` →
+`01_notebook.ipynb`, `build_02.py` → `02_notebook.ipynb`, and so on. The `.py` is the source; the
+`.ipynb` is a build artifact you never open.
+
+```python
+#!/usr/bin/env python3
+"""Generate 0N_notebook.ipynb per AGENTS.md and the step prompt."""
+import nbformat as nbf
+
+nb = nbf.v4.new_notebook()
+
+# Cell 1: markdown
+nb.cells.append(nbf.v4.new_markdown_cell(r"""
+Beginner-tone explanation of the next cell.
+"""))
+
+# Cell 1: code
+nb.cells.append(nbf.v4.new_code_cell(r"""# cell 1 — description
+print(f'ready: {n} qubits')
+"""))
+
+# ...one markdown cell and its code cell per step, at most 6 code cells...
+
+with open("0N_notebook.ipynb", "w") as f:
+    nbf.write(nb, f)
+print("Wrote 0N_notebook.ipynb")
+```
+
+Keep the generator flat — no constants, loops or conditionals at generator level; the cell text is the
+content. Opening the code cell on the same line as `"""` puts `# cell N` on line 1 where it belongs.
+
+Use **raw** triple-quoted strings (`r"""…"""`) for cell source. In a plain `"""…"""` the generator's own
+parser eats the backslash, so `print("\nDONE")` reaches the cell as a real newline inside a string
+literal and fails with `SyntaxError: unterminated string literal`. Raw strings pass it through, and you
+write `\n` instead of `\\n`. Keep `"""` out of the cell body.
+
+Then, every time, in this order: **regenerate** (`python build_0N.py`, ~1 s) → **validate** (both checks
+below, ~0.02 s) → **execute once** (`nbconvert`, minutes). When a cell fails, fix `build_0N.py` and
+start again at regenerate — validating is four orders of magnitude cheaper than rediscovering the same
+error during execution.
+
+- Do not hand-write `.ipynb` JSON. Build it with a short `nbformat` script and write the file once.
+  Hand-written JSON breaks on quotes and newlines inside `source`.
 - If `nbconvert` fails in under ~10 seconds, suspect the file, not the physics — check with
   `python -m json.tool <notebook>.ipynb > /dev/null` before changing any code.
 - **Never hand-edit the `.ipynb` file** — not the whole file, not a single cell, not via a line-offset
