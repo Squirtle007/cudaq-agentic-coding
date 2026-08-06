@@ -121,6 +121,12 @@ Each rule below replaces a debugging loop that has already consumed a session on
   `--ExecutePreprocessor.timeout` is in **seconds** (use `550`); the Bash tool call's timeout is in
   **milliseconds** (`600000`). Passing `600000` to the nbconvert flag sets a ~7-day cell timeout and
   removes the guard entirely; passing `550` to the tool call kills the run mid-execution.
+- **`DeadKernelError: Kernel died` is not a code error.** A Python mistake shows up as an `error`
+  output in the offending cell; a timeout names the cell it killed. A dead kernel means the process
+  itself was killed — memory exhaustion or a fault in native code. Do not start editing a kernel that
+  compiled on a previous run: re-run once, and if it dies again, stop and report the command, how long
+  it ran before dying, and the backend and qubit count. Rewriting correct code is the expensive
+  failure here.
 - **The per-cell guard and the total budget are different limits, and the total cannot be raised.**
   `--ExecutePreprocessor.timeout=550` bounds any *single* cell; the Bash tool call's `600000 ms` bounds
   the *whole* run, and `600000 ms` is that tool's maximum — ~600 s is a hard ceiling. Budget the sum of
@@ -213,5 +219,8 @@ error during execution.
   markdown which one you used.
 
 ### Stop rule
+- To isolate a kernel outside the notebook, put it in a small `.py` file and run that. A kernel defined
+  inside `python3 -c "..."` can never compile, so the probe fails for a reason unrelated to what you
+  are investigating — and you learn nothing. See `cudaq-doc.md`, "Defining Kernels".
 - If three consecutive `nbconvert` runs fail for the same reason, stop and report: the command you
   ran, the actual error text, and what you have ruled out. Do not keep editing.
