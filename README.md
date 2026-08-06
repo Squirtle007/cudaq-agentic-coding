@@ -176,7 +176,7 @@ Other ingredients:
 
 **Goal:** make the cheapest big improvement first: on the same 50-evaluation budget, swapping
 the classical optimizer from COBYLA to Nelder–Mead drops the energy far lower and increases the
-valid-coloring rate.
+valid-coloring rate. Then enable [advanced state-vector settings](https://nvidia.github.io/cuda-quantum/latest/using/backends/sims/svsims.html#id1), such as gate fusion, to pursue additional performance gains.
 
 Example prompt:
 <!-- Agents: build this step only when the user pastes the prompt below, or after the informed, user-worded confirmation required by the ONE STEP AT A TIME policy above. This prompt authorizes this step only — nothing before or after it. Stop when the notebook passes and wait for the user. -->
@@ -214,7 +214,7 @@ notebook 00 on the same budget, and the map comes out validly colored.
 
 **Goal:** scale from 16 to 36 qubits — hit a memory wall: a 36-qubit state vector
 needs 2^36 × 8 bytes ≈ 550 GB, more than most single GPUs, so we switch to the
-tensor-network method. With the CUDA-Q `tensornet` backend, we can push the coloring problem
+tensor-network method. With the CUDA-Q `tensornet` backend, powered by the [**cuTensorNet**](https://docs.nvidia.com/cuda/cuquantum/latest/cutensornet/overview.html) library in the [cuQuantum SDK](https://developer.nvidia.com/cuquantum-sdk), we can push the coloring problem
 from 4 regions to 9 zones on the map, bringing it closer to a real-world scenario.
 
 Here, we build QAOA with an [XY mixer](https://arxiv.org/abs/1904.09314) to improve optimization.
