@@ -75,6 +75,9 @@ Apply the rules below everywhere unless a prompt overrides one:
 - Carry values at **full precision** — printed numbers are rounded, and a rounded value fed back
   into code can cross a boundary (`3.141593` sits *above* π and trips a bounded optimizer). If a
   value is, within rounding, a known constant, write the constant (`math.pi`), not the print.
+- Derived constants — angles, lookup tables — belong in host code: compute them once before the kernel
+  and pass them in as typed arguments (`float`, `list[float]`). Never recompute them inside a kernel
+  body.
 - Timings are machine-dependent — report ratios, not exact digits.
 
 ## Correctness & sampling

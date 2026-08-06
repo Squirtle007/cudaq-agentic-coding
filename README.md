@@ -237,7 +237,8 @@ Structure:
    - W-state per zone: x(q[base]); for k in 0..2:
      ry.ctrl(W_ANGLES[k], q[base+k], q[base+k+1]) then x.ctrl(q[base+k+1], q[base+k]);
      W_ANGLES = [2*math.acos(1/math.sqrt(4)), 2*math.acos(1/math.sqrt(3)), 2*math.acos(1/math.sqrt(2))]
-     (leverage the math library — no long decimal literals).
+     — build this on the host, before the kernel, and pass it in as a list[float] argument; a kernel
+     body cannot call math functions (leverage the math library — no long decimal literals).
    - 00's cost layer: rz for Z terms, cx-rz-cx for ZZ.
    - XY ring mixer over ring pairs (0,1),(1,2),(2,3),(3,0):
      XX: h,h / cx / rz(2*beta) / cx / h,h
