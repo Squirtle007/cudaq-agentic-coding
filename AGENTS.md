@@ -113,6 +113,10 @@ Each rule below replaces a debugging loop that has already consumed a session on
   set is the timeout, not a bug: raise it, do not edit the code. Lowering it to 120 or 300 to "fail
   faster" manufactures an error that looks like broken physics and has cost hours of edits to
   already-correct code.
+- **The two timeouts are different units — never copy one into the other.**
+  `--ExecutePreprocessor.timeout` is in **seconds** (use `550`); the Bash tool call's timeout is in
+  **milliseconds** (`600000`). Passing `600000` to the nbconvert flag sets a ~7-day cell timeout and
+  removes the guard entirely; passing `550` to the tool call kills the run mid-execution.
 
 ### Writing the notebook file
 - Do not hand-write `.ipynb` JSON. Build it with a short `nbformat` script
@@ -120,6 +124,22 @@ Each rule below replaces a debugging loop that has already consumed a session on
   breaks on quotes and newlines inside `source`.
 - If `nbconvert` fails in under ~10 seconds, suspect the file, not the physics — check with
   `python -m json.tool <notebook>.ipynb > /dev/null` before changing any code.
+- **Never hand-edit the `.ipynb` file** — not the whole file, not a single cell, not via a line-offset
+  read. Change the generator script and re-run it; regenerating costs seconds. Editing cell source as
+  JSON means every quote inside `print(f"...")` needs `\"`, and one wrong escape gives
+  `nbformat.reader.parse_json ... Expecting value: line N column M`, which reads like a code error and
+  is not. Keep the generator script — it is the notebook's source of truth for the whole build.
+- **Validate before every execute, not after.** Two checks, together under a second:
+  `python -m json.tool <notebook>.ipynb > /dev/null`, and `compile()` on every code cell's source.
+  A full execute of 02–04 costs 5–10 minutes; these cost ~0.02 s. Never spend the former to discover
+  something the latter would have caught. Aim for **one** successful `nbconvert`, not a sequence.
+- Quote f-strings in notebook code with **single** quotes — `print(f'valid rate: {rate:.2%}')`.
+  Double quotes force `\"` escaping once the source is stored in the notebook.
+- Keep conditionals **out** of f-strings. Compute the value on its own line first
+  (`verdict = 'SUCCESS' if speedup > 1.0 else 'IMPROVEMENT NEEDED'`), then print `{verdict}`. Nested
+  quotes-inside-conditionals-inside-an-f-string is the most common way a generated notebook becomes
+  invalid JSON — and it usually sits in the final summary cell, so every retry re-pays the whole
+  optimization.
 
 ### Keep the notebook out of your context
 - **Never read back a notebook you have executed.** Executed notebooks store every figure as a base64
@@ -127,7 +147,8 @@ Each rule below replaces a debugging loop that has already consumed a session on
   Re-reading and rewriting an executed notebook is what exhausts the context window; the session then
   dies with a provider `Bad Request` or is silently compacted, losing the build history.
 - To check a result, read `nbconvert`'s stdout/stderr, or have the cell print what you need.
-- To change one cell, edit that cell — never rewrite the whole notebook.
+- To confirm every cell ran, do not open the file — read it with `nbformat` and print only counts:
+  `python3 -c "import nbformat; nb=nbformat.read(open('NB.ipynb'),as_version=4); [print(i,len(c.outputs)) for i,c in enumerate(nb.cells) if c.cell_type=='code']"`
 
 ### When sources disagree
 - Where `cudaq-doc.md` and a step prompt disagree on a convention, follow the step prompt and note in

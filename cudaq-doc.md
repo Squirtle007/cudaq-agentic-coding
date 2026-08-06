@@ -3519,9 +3519,13 @@ of magnitude relative to vanilla on the same problem, before any optimization at
 These are safeguards with each one earns its place — violating any of them has produced real, hard-to-spot failures in practice.
 
 **Correctness**
-1. **Verify the wiring with the free anchors.** `energy(all-zero angles)` must equal the
-   offset (the average energy over all bitstrings). For a constrained ansatz, sampling at
-   mixer-only angles must satisfy the constraint in 100% of shots.
+1. **Verify the wiring with the free anchors.** For an *unconstrained* ansatz (`h` on every qubit),
+   `energy(all-zero angles)` must equal the offset (the average energy over all bitstrings). This
+   anchor does **not** hold for a constrained ansatz: a W-state/XY circuit starts inside the feasible
+   subspace, not in a uniform superposition, so its zero-angle energy is legitimately far from the
+   offset — do not carry the check over from an unconstrained notebook and report the mismatch as
+   expected. There the anchor is instead: sampling at mixer-only angles must satisfy the constraint
+   in 100% of shots.
 3. **Prefer arithmetic index computation over control flow inside kernels** — e.g. write a
    ring wrap-around as `(k + 1) % m`, not as an `if` reassignment. Kernel compilers may
    handle in-kernel branching differently than plain Python; arithmetic indexing is
