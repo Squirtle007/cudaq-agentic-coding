@@ -52,7 +52,8 @@ Apply the rules below everywhere unless a prompt overrides one:
 
 ## Reuse `helpers.py` (read-only) — don't reimplement
 - Read `helpers.py` first and call it for loading data, building the problem, decoding/validating
-  samples, timing, and drawing. Do not rewrite what it already provides.
+  samples, and drawing. Do not rewrite what it already provides. (For timing, see Known failure
+  modes — never wrap `energy()` in `helpers.time_it` for 02–04.)
 - **Always visualize the final result** from the sampling counts: run the counts through
   `helpers.summarize_samples`, take its decoded best assignment, and draw it with
   `helpers.plot_map` (fills from `helpers.PALETTE`, node positions from `helpers.group_positions`,
@@ -97,8 +98,8 @@ Apply the rules below everywhere unless a prompt overrides one:
   600000 ms — Never the 120s default and never run in the background or concurrently; some notebooks
   take ~10 minutes, so wait for completion.
 - Before executing, `compile()` every code cell's source to catch syntax errors cheaply.
-- If a cell errors, fix the notebook and rerun the same way until clean; confirm every code
-  cell has outputs and zero errors before considering the build done.
+- If a cell errors, fix the generator script, regenerate the notebook, and rerun the same way until
+  clean; confirm every code cell has outputs and zero errors before considering the build done.
 
 ## Known failure modes — read before building 01–04
 
@@ -117,6 +118,19 @@ Each rule below replaces a debugging loop that has already consumed a session on
   `--ExecutePreprocessor.timeout` is in **seconds** (use `550`); the Bash tool call's timeout is in
   **milliseconds** (`600000`). Passing `600000` to the nbconvert flag sets a ~7-day cell timeout and
   removes the guard entirely; passing `550` to the tool call kills the run mid-execution.
+- **The per-cell guard and the total budget are different limits, and the total cannot be raised.**
+  `--ExecutePreprocessor.timeout=550` bounds any *single* cell; the Bash tool call's `600000 ms` bounds
+  the *whole* run, and `600000 ms` is that tool's maximum — ~600 s is a hard ceiling. Budget the sum of
+  all cells against it, not each cell separately: 02's full run measured 494 s, leaving roughly 100 s of
+  margin for imports, sampling and plotting. If a build would exceed the ceiling, do not lower the
+  per-cell guard and do not retry blindly — stop and report the measured time, per Budgets.
+- **Never wrap `energy()` in `helpers.time_it` for 02–04.** `time_it` runs its function four times
+  (one warm-up plus three timed), and `00_notebook.ipynb` calls it twice — eight extra evaluations.
+  The step prompts for 02–04 cap the total ("No energy calls outside these 5"), and eight more
+  tensornet evaluations are enough on their own to push a 494 s run past the ~600 s ceiling above.
+  Time the optimization as a whole instead: `time.perf_counter()` around `optimizer.optimize(...)`,
+  count the calls with a counter, and report `total / count`. `time_it` remains the right tool in
+  00/01, where one evaluation is milliseconds and no cap applies.
 
 ### Writing the notebook file
 - Do not hand-write `.ipynb` JSON. Build it with a short `nbformat` script
