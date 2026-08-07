@@ -18,7 +18,7 @@ set +a
 : "${COURSE_SOURCE_PATH:?COURSE_SOURCE_PATH is missing}"
 
 case "$COURSE_REPO_PATH" in
-  /home/*/cudaq-agentic-coding) ;;
+  /home/*/cudaq-agentic-coding|/home/*/cudaq-agentic-coding-student2) ;;
   *) echo "Refusing unexpected reset target: $COURSE_REPO_PATH" >&2; exit 1 ;;
 esac
 

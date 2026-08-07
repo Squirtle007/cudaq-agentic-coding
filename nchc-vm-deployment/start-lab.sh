@@ -186,6 +186,6 @@ case "$public_host_source" in
 esac
 echo "Security: this link contains the Jupyter token. Do not share it or paste it into chat."
 echo "Backup SSH tunnel (SSH port 3322):"
-echo "  ssh -p 3322 -L ${jupyter_port}:127.0.0.1:${jupyter_port} ubuntu@${public_host}"
+echo "  ssh -p 3322 -L ${jupyter_port}:127.0.0.1:${jupyter_port} ${USER:-ubuntu}@${public_host}"
 echo "  Then visit: $tunnel_url"
 echo "The token is also stored in: $course_env_file"

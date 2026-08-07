@@ -5,6 +5,7 @@
 ## 兩種使用角色
 
 - 學生：使用繁中版 [Markdown](student-guide.zh-TW.md)／[PDF](student-guide.zh-TW.pdf)，或英文版 [Markdown](student-guide.en.md)／[PDF](student-guide.en.pdf)，再執行驗證與啟動腳本。
+- 同一台 VM 由兩位學員共用：使用 [雙學員操作指南](two-students-one-vm.zh-TW.md)；兩個 Lab 使用不同 workspace、runtime、Compose project、port 與 token。
 - 教師／國網維運：閱讀 [instructor-image-guide.zh-TW.md](instructor-image-guide.zh-TW.md)，建立、驗收及封裝母 VM。
 - 封裝前人工複驗：閱讀 [manual-validation-before-image.zh-TW.md](manual-validation-before-image.zh-TW.md)，隔離驗證 OpenCode 並建立活動憑證包。
 
@@ -29,7 +30,7 @@ CUDA-Q base image使用 `linux/amd64` manifest digest固定，適用本課程的
 ./configure-course-env.sh
 sudo ./prepare-activity-image-credentials.sh
 
-# 學生只執行一次：帶入活動 key、產生個人 token、驗證並啟動 Lab
+# 第一位學員執行一次；第一個 Lab 正在執行時，第二次執行會建立隔離的學員 2 Lab
 ./activate-student-course.sh
 
 # 後續停止／重新啟動／查看 JupyterLab
@@ -69,7 +70,8 @@ sudo ./finalize-vm-image.sh
 | `provision-course-env.sh` | 啟用腳本內部使用固定設定，建立學生的 mode 600 course env |
 | `render-opencode-config.sh` | 只為已提供 key 的固定 provider 產生不含明文 key 的 `opencode.json` |
 | `prepare-activity-image-credentials.sh` | 講師將驗證過的 key 建成 VM image 內 root-only 活動憑證包 |
-| `activate-student-course.sh` | 學生一鍵帶入 key、產生 token、驗證並啟動 Lab |
+| `activate-student-course.sh` | 學生一鍵帶入 key、產生 token、驗證並啟動 Lab；重跑可建立／恢復隔離的學員 2 Lab |
+| `two-students-one-vm.zh-TW.md` | 同一個 `ubuntu` 帳號下兩位學員共用 VM 的 workspace、port、token 與維運指引 |
 | `course-reset.sh` | 備份目前學生作業，再從正式教材快照還原乾淨工作區 |
 | `reset-manual-validation.sh` | 可恢復地重設教材、Notebook/程式衍生物、Jupyter/OpenCode runtime、stats/session/cache/log 與已安裝的課程 skills，保留課程憑證並驗證 workspace 等同唯讀 source |
 | `finalize-vm-image.sh` | 最後一次人工測試後停止服務、更新 root-only 活動憑證包，清除 env/token/runtime/驗收備份與 build workspace，完成不顯示內容的 secret audit |
