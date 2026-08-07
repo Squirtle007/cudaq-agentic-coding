@@ -55,15 +55,42 @@ chmod 600 ~/Downloads/bootcamp0807.pem
 ssh -p 3322 -i ~/Downloads/bootcamp0807.pem ubuntu@140.110.109.XXX
 ```
 
-### Windows 10／11 PowerShell
+### Windows 10／11 PowerShell（有 WSL）
 
-Windows 10／11 通常已內建 OpenSSH Client。開啟 PowerShell：
+先從 PowerShell 輸入 `wsl` 進入 Linux shell。不要直接從 `/mnt/c` 使用 private key；先複製到
+WSL 自己的 Linux 檔案系統，再設定 mode 600。請將 `<你的Windows帳號>` 換成實際帳號：
 
-```powershell
-ssh -p 3322 -i "$HOME\Downloads\bootcamp0807.pem" ubuntu@140.110.109.XXX
+```bash
+mkdir -p ~/Downloads
+cp "/mnt/c/Users/<你的Windows帳號>/Downloads/bootcamp0807.pem" ~/Downloads/
+chmod 600 ~/Downloads/bootcamp0807.pem
+ssh -p 3322 -i ~/Downloads/bootcamp0807.pem ubuntu@140.110.109.XXX
 ```
 
-如果顯示 `ssh is not recognized`，請至：
+這樣可以避開 `/mnt/c` 的 Windows ACL 與 Linux mode 對應差異。
+
+### Windows 10／11 PowerShell（沒有 WSL）
+
+原生 PowerShell 不提供 Linux 的 `chmod`。以 `icacls.exe` 關閉繼承，只保留目前 Windows
+使用者的讀取權限，再使用內建 OpenSSH Client：
+
+```powershell
+$pem = "$HOME\Downloads\bootcamp0807.pem"
+$account = whoami
+icacls.exe $pem /reset
+if ($LASTEXITCODE -ne 0) { throw "無法重設 PEM ACL" }
+icacls.exe $pem /grant:r "${account}:(R)"
+if ($LASTEXITCODE -ne 0) { throw "無法授權目前 Windows 使用者讀取 PEM" }
+icacls.exe $pem /inheritance:r
+if ($LASTEXITCODE -ne 0) { throw "無法移除 PEM 的繼承權限" }
+ssh -p 3322 -i $pem ubuntu@140.110.109.XXX
+```
+
+`/reset` 先還原一般 ACL，`/grant:r` 將目前帳號的明確權限設成唯讀，最後
+`/inheritance:r` 移除其他繼承權限；語法可對照
+[Microsoft `icacls` 文件](https://learn.microsoft.com/windows-server/administration/windows-commands/icacls)。
+
+Windows 10／11 通常已內建 OpenSSH Client。如果顯示 `ssh is not recognized`，請至：
 
 ```text
 Settings → Apps → Optional Features → Add a feature → OpenSSH Client
@@ -92,6 +119,8 @@ ubuntu@vm206-2:~$
 ```
 
 ## Step 2：一鍵啟用、驗證並啟動課程環境
+
+若教師安排兩位學員共用同一台 VM，請改看[雙學員操作指南](two-students-one-vm.zh-TW.md)。
 
 ```bash
 cd ~/cudaq-course-kit
@@ -419,7 +448,7 @@ cd ~/cudaq-course-kit
 | Container 看不到 GPU | `nvidia-smi`、`docker info` | 不要重裝 Driver；提供 `verify-environment.sh` 完整輸出 |
 | 找不到 course image | `docker image ls` | 母 VM 未正確封裝；學生不要自行 pull/build |
 | 8888 已被占用 | `ss -ltnp | grep 8888` | 由助教檢查 8888 publication／NCHC 網路規則；必要時使用 SSH 3322 tunnel |
-| SSH 顯示 `Permission denied (publickey)` | 確認使用指定 IP、SSH port 3322、帳號 `ubuntu` 與正確 PEM 路徑 | macOS 再執行 `chmod 600`；Windows 確認檔案未被改名為 `.pem.txt` |
+| SSH 顯示 `Permission denied (publickey)` | 確認使用指定 IP、SSH port 3322、帳號 `ubuntu` 與正確 PEM 路徑 | macOS／WSL 再執行 `chmod 600`；原生 Windows PowerShell 重新執行上方 `icacls.exe`，並確認檔案未被改名為 `.pem.txt` |
 | SSH 顯示 `Connection timed out` | 確認 IP、網路與 VPN 要求 | 不要改 VM；將指定 IP 與錯誤畫面交給助教 |
 | SSH 顯示 host key changed | 不要直接忽略警告 | 請助教確認該 IP 是否重建或重新分配後，再依指示更新 known_hosts |
 | Jupyter token 錯誤 | 查個人 course env | 關閉舊分頁，使用正確 token 重新登入 |

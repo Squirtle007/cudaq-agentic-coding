@@ -221,6 +221,13 @@ cd ~/cudaq-course-kit
 
 啟用腳本會顯示活動 key 到期/BYOK 通知、建立 mode 600 的個人 `course.env`、產生該 VM 專屬 Jupyter token、執行 `verify-environment.sh` 並啟動 JupyterLab。
 
+若臨時需要兩位學員共用同一台 VM，不必重建舊 image；只要用新版
+`activate-student-course.sh` 覆蓋學生 home 內的舊檔即可。第一個 Lab 正在執行時，第二次執行
+相同啟用指令會建立 port 8889、第二份 repo/runtime/Compose project/token；既有第二份環境則
+保留 token 並重新顯示完整連結。完整路徑、操作與 GPU 共用限制請見
+[兩位學員共用一台 VM](two-students-one-vm.zh-TW.md)。NCHC security group／ACL 也必須允許
+課程來源網段連入 TCP 8889。
+
 ## 7. 執行環境驗收
 
 ```bash
