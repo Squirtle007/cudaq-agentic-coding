@@ -95,6 +95,7 @@ ubuntu@vm206-2:~$
 
 ```bash
 cd ~/cudaq-course-kit
+./reset-manual-validation.sh   # for reset the env
 ./activate-student-course.sh
 ```
 
