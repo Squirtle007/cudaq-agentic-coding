@@ -353,9 +353,18 @@ on another machine or with another agent.
 prompt uses OpenCode's; if you are on another agent, swap the folder:
 ```text
 Install SKILL.md as an active skill for yourself: copy it to
-~/.config/opencode/skills/cudaq-gpu-opt-skill/SKILL.md, then confirm you can see the skill
-and summarize when you'd apply it.
+~/.config/opencode/skills/cudaq-gpu-opt-skill/SKILL.md, then also install it project-locally
+so it is active in this repo:
+mkdir -p .opencode/skills/cudaq-gpu-opt-skill
+cp SKILL.md .opencode/skills/cudaq-gpu-opt-skill/SKILL.md
+Then confirm you can see the skill and summarize when you'd apply it.
 ```
+
+Install to both places. The global folder is the one you want long-term — it makes the skill
+available in every project — but the copy under `.opencode/skills/` is what the agent picks
+up for *this* repo, which is where you are testing it. Skipping the project-local copy is the
+usual reason the agent reports it cannot see the skill it just installed. Skills are read when
+the agent starts, so if it still does not list the skill, restart `opencode` and ask again.
 
 Only that folder changes per agent — Codex reads `~/.codex/skills/`, Claude reads
 `~/.claude/skills/`, and each has a project-local twin (`.opencode/skills/`,
